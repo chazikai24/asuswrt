@@ -49,6 +49,7 @@ var overlib_str = new Array();	//Viz add 2011.07 for record longer virtual srvr 
 
 var vts_rulelist_array = "<% nvram_char_to_ascii("","vts_rulelist"); %>";
 var ctf_disable = '<% nvram_get("ctf_disable"); %>';
+var wans_mode ='<% nvram_get("wans_mode"); %>';
 
 function initial(){
 	show_menu();
@@ -62,6 +63,9 @@ function initial(){
 		document.getElementById('FTP_desc').style.display = "none";
 		document.form.vts_ftpport.parentNode.parentNode.style.display = "none";
 	}
+
+	if(dualWAN_support && wans_mode == "lb")
+		document.getElementById("lb_note").style.display = "";
 }
 
 function isChange(){
@@ -553,6 +557,7 @@ function changeBgColor(obj, num){
 		<div class="formfontdesc" style="margin-top:-10px;">
 			<a id="faq" href="" target="_blank" style="font-family:Lucida Console;text-decoration:underline;"><#menu5_3_4#>&nbspFAQ</a>
 		</div>
+		<div class="formfontdesc" id="lb_note" style="color:#FFCC00; display:none;"><#lb_note_portForwarding#></div>
 
 		<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable">
 					  <thead>

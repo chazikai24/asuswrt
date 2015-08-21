@@ -113,18 +113,43 @@ function initial(){
 	}	
 	
 	if(wifi_tog_btn_support || wifi_hw_sw_support || sw_mode == 2 || sw_mode == 4){		// wifi_tog_btn && wifi_hw_sw && hide WPS button behavior under repeater mode
-			document.form.btn_ez_radiotoggle[0].disabled = true;
-			document.form.btn_ez_radiotoggle[1].disabled = true;
-			document.getElementById('btn_ez_radiotoggle_tr').style.display = "none";
-	}else{
-			document.getElementById('btn_ez_radiotoggle_tr').style.display = "";
-	}	
-	if(cfg_wps_btn_support){
-		document.getElementById('btn_ez_mode_tr').style.display = "";
-	}else{
-		document.form.btn_ez_mode.disabled = true;
-		document.getElementById('btn_ez_mode_tr').style.display = "none";
+			if(cfg_wps_btn_support){
+				document.getElementById('turn_WPS').style.display = "";
+				document.form.btn_ez_radiotoggle[1].disabled = true;
+				document.getElementById('turn_WiFi').style.display = "none";
+				document.getElementById('turn_WiFi_str').style.display = "none";
+				document.getElementById('turn_LED').style.display = "";
+				if(document.form.btn_ez_radiotoggle[2].checked == false)
+					document.form.btn_ez_radiotoggle[0].checked = true;
+			}
+			else{
+				document.form.btn_ez_radiotoggle[0].disabled = true;
+				document.form.btn_ez_radiotoggle[1].disabled = true;
+				document.form.btn_ez_radiotoggle[2].disabled = true;
+				document.getElementById('btn_ez_radiotoggle_tr').style.display = "none";
+			}
 	}
+	else{
+			
+			document.getElementById('btn_ez_radiotoggle_tr').style.display = "";
+			if(cfg_wps_btn_support){
+				document.getElementById('turn_WPS').style.display = "";
+				document.getElementById('turn_WiFi').style.display = "";
+				document.getElementById('turn_LED').style.display = "";
+				if(document.form.btn_ez_radiotoggle[1].checked == false && document.form.btn_ez_radiotoggle[2].checked == false)
+					document.form.btn_ez_radiotoggle[0].checked = true;
+			}
+			else{
+				document.getElementById('turn_WPS').style.display = "";
+				document.getElementById('turn_WiFi').style.display = "";
+				document.getElementById('turn_LED').disabled = true;
+				document.getElementById('turn_LED').style.display = "none";
+				document.getElementById('turn_LED_str').style.display = "none";
+				if(document.form.btn_ez_radiotoggle[1].checked == false)
+					document.form.btn_ez_radiotoggle[0].checked = true;		
+			}
+	}
+	
 	if(sw_mode != 1){
 		document.getElementById('misc_http_x_tr').style.display ="none";
 		hideport(0);
@@ -224,7 +249,7 @@ function applyRule(){
 				|| document.form.misc_httpport_x.value != '<% nvram_get("misc_httpport_x"); %>'
 				|| document.form.misc_httpsport_x.value != '<% nvram_get("misc_httpsport_x"); %>'
 			){
-			document.form.action_script.value = "restart_time;restart_change_https";
+			document.form.action_script.value = "restart_time;restart_httpd";
 			if(document.form.http_enable.value == "0"){	//HTTP
 				if(isFromWAN)
 					document.form.flag.value = "http://" + location.hostname + ":" + document.form.misc_httpport_x.value;
@@ -251,6 +276,20 @@ function applyRule(){
 				}
 			}   
 		}
+		
+		if(document.form.btn_ez_radiotoggle[1].disabled == false && document.form.btn_ez_radiotoggle[1].checked == true){
+				document.form.btn_ez_radiotoggle.value=1;
+				document.form.btn_ez_mode.value=0;				
+		}
+		else if(document.form.btn_ez_radiotoggle[2].disabled == false && document.form.btn_ez_radiotoggle[2].checked == true){
+				document.form.btn_ez_radiotoggle.value=0;
+				document.form.btn_ez_mode.value=1;				
+		}
+		else{		
+				document.form.btn_ez_radiotoggle.value=0;
+				document.form.btn_ez_mode.value=0;				
+		}
+		
 		showLoading();
 		document.form.submit();
 	}
@@ -956,6 +995,7 @@ function display_spec_IP(flag){
 <input type="hidden" name="time_zone_dstoff" value="<% nvram_get("time_zone_dstoff"); %>">
 <input type="hidden" name="http_passwd" value="" disabled>
 <input type="hidden" name="http_clientlist" value="<% nvram_get("http_clientlist"); %>">
+<input type="hidden" name="btn_ez_mode" value="<% nvram_get("btn_ez_mode"); %>">
 
 <table class="content" align="center" cellpadding="0" cellspacing="0">
   <tr>
@@ -978,7 +1018,7 @@ function display_spec_IP(flag){
 	<tr>
 		<td bgcolor="#4D595D" valign="top">
 			<div>&nbsp;</div>
-			<div class="formfonttitle"><#menu5_6_adv#> - <#menu5_6_2#></div>
+			<div class="formfonttitle"><#menu5_6#> - <#menu5_6_2#></div>
 			<div style="margin-left:5px;margin-top:10px;margin-bottom:10px"><img src="/images/New_ui/export/line_export.png"></div>
 			<div class="formfontdesc"><#Syste_title#></div>
 
@@ -1024,14 +1064,14 @@ function display_spec_IP(flag){
 					</tr>
 				</thead>
 				<tr>
-					<th>SSH Enable</th>
+					<th width="40%">SSH Enable</th>
 					<td>
 						<input type="radio" name="sshd_enable" class="input" value="1" onclick="check_sshd_enable(this.value);" <% nvram_match("sshd_enable", "1", "checked"); %>><#checkbox_Yes#>
 						<input type="radio" name="sshd_enable" class="input" value="0" onclick="check_sshd_enable(this.value);" <% nvram_match("sshd_enable", "0", "checked"); %>><#checkbox_No#>
 					</td>
 				</tr>
 				<tr id="sshd_port_tr">
-					<th>SSH Port</th>
+					<th width="40%">SSH Port</th>
 					<td>
 						<input type="text" class="input_6_table" maxlength="5" name="sshd_port" onKeyPress="return validator.isNumber(this,event);" value='<% nvram_get("sshd_port"); %>' autocorrect="off" autocapitalize="off">
 					</td>
@@ -1088,19 +1128,11 @@ function display_spec_IP(flag){
 				<tr id="btn_ez_radiotoggle_tr">
 					<th><#WPS_btn_behavior#></th>
 					<td>
-						<input type="radio" name="btn_ez_radiotoggle" class="input" value="1" <% nvram_match_x("", "btn_ez_radiotoggle", "1", "checked"); %>><#WPS_btn_toggle#>
-						<input type="radio" name="btn_ez_radiotoggle" class="input" value="0" <% nvram_match_x("", "btn_ez_radiotoggle", "0", "checked"); %>><#WPS_btn_actWPS#>
+						<input type="radio" name="btn_ez_radiotoggle" id="turn_WPS" class="input" style="display:none;" value="0"><label for="turn_WPS"><#WPS_btn_actWPS#></label>
+						<input type="radio" name="btn_ez_radiotoggle" id="turn_WiFi" class="input" style="display:none;" value="1" <% nvram_match_x("", "btn_ez_radiotoggle", "1", "checked"); %>><label for="turn_WiFi" id="turn_WiFi_str"><#WPS_btn_toggle#></label>
+						<input type="radio" name="btn_ez_radiotoggle" id="turn_LED" class="input" style="display:none;" value="0" <% nvram_match_x("", "btn_ez_mode", "1", "checked"); %>><label for="turn_LED" id="turn_LED_str">Turn LED On/Off</label>
 					</td>
-				</tr>
-				<tr id="btn_ez_mode_tr">
-					<th><#WPS_btn_behavior#></th>
-					<td>
-						<select name="btn_ez_mode" class="input_option">
-							<option value="0" <% nvram_match("btn_ez_mode", "0", "selected"); %>><#WPS_btn_actWPS#></option>
-							<option value="1" <% nvram_match("btn_ez_mode", "1", "selected"); %>>Turn LED On/Off</option>
-						</select>
-					</td>
-				</tr>
+				</tr>				
 				<tr>
 					<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(11,1)"><#LANHostConfig_x_ServerLogEnable_itemname#></a></th>
 					<td><input type="text" maxlength="15" class="input_15_table" name="log_ipaddr" value="<% nvram_get("log_ipaddr"); %>" onKeyPress="return validator.isIPAddr(this, event)" autocorrect="off" autocapitalize="off"></td>

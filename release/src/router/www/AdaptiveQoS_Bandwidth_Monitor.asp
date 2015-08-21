@@ -17,10 +17,11 @@
 <script type="text/javascript" src="/popup.js"></script>
 <script type="text/javascript" src="/help.js"></script>
 <script type="text/javascript" src="/general.js"></script>
-<script type="text/javascript" src="/client_function.js"></script>
 <script type="text/javascript" src="/jquery.js"></script>
+<script type="text/javascript" src="/client_function.js"></script>
 <script type="text/javascript" src="/calendar/jquery-ui.js"></script> 
 <script type="text/javascript" src="/switcherplugin/jquery.iphone-switch.js"></script>
+<script type="text/javascript" src="/form.js"></script>
 <style type="text/css">
 .splitLine{
 	background-image: url('/images/New_ui/export/line_export.png');
@@ -60,6 +61,25 @@
 	border-radius:10px;
 	margin-left:10px;
 	background-position:50% 64.40%;
+}
+.trafficVenderIcons{
+	width:56px;
+	height:56px;
+	background-image:url('/images/New_ui/networkmap/vender-list.png');
+	background-repeat:no-repeat;
+	border-radius:10px;
+	margin-left:10px;
+}
+.trafficVenderIcons:hover{
+	background-image:url('/images/New_ui/networkmap/vender-listover.png');
+}
+.trafficVenderIcons_clicked{
+	width:56px;
+	height:56px;
+	background-image:url('/images/New_ui/networkmap/vender-listover.png');
+	background-repeat:no-repeat;
+	border-radius:10px;
+	margin-left:10px;
 }
 
 .qosLevel{
@@ -115,7 +135,11 @@
 // disable auto log out
 AUTOLOGOUT_MAX_MINUTE = 0;
 var detect_interval = 2;	// get information per second
-window.onresize = cal_agreement_block;
+window.onresize = function() {
+	if(document.getElementById("agreement_panel").style.display == "block") {
+		cal_panel_block("agreement_panel", 0.25);
+	}
+} 
 var qos_rulelist = "<% nvram_get("qos_rulelist"); %>".replace(/&#62/g, ">").replace(/&#60/g, "<");
 var curState = '<% nvram_get("apps_analysis"); %>';
 
@@ -141,7 +165,7 @@ function register_event(){
 				this.style.backgroundColor = "";
 				this.style.fontWeight = "";
 				this.children[0].children[0].style.backgroundColor = color_array[ui.draggable[0].id];
-				if(this.children[0].children[0].className.indexOf("trafficIcons") == -1) {
+				if(this.children[0].children[0].className.indexOf("trafficIcons") == -1 && this.children[0].children[0].className.indexOf("trafficVenderIcons") == -1) {
 					this.children[0].children[0].setAttribute("class", "closed qosLevel divUserIcon");
 				}
 				regen_qos_rule(this.children[0].children[0], ui.draggable[0].id);				
@@ -216,8 +240,30 @@ router_traffic_old = new Array();
 function calculate_router_traffic(traffic){
 	router_traffic_new = new Array();
 	router_traffic_new = traffic;
-	var tx = router_traffic_new[0] - router_traffic_old[0];
-	var rx = router_traffic_new[1] - router_traffic_old[1];
+	var tx = 0;
+	var rx = 0;
+
+	if(!router_traffic_old){
+		router_traffic_old = [0, 0];
+	}
+	
+	if(router_traffic_new[0] - router_traffic_old[0] < 0){		// to control overflow issue
+		tx = (parseInt(router_traffic_new[0]) + Math.pow(2,32)) - router_traffic_old[0];	
+	}
+	else{
+		tx = router_traffic_new[0] - router_traffic_old[0];
+	}
+	
+	if(router_traffic_new[1] - router_traffic_old[1] < 0){
+		rx = (parseInt(router_traffic_new[1]) + Math.pow(2,32)) - router_traffic_old[1];
+	}
+	else{
+		rx = router_traffic_new[1] - router_traffic_old[1];
+	}
+
+	
+	
+	
 	tx = tx*8/detect_interval;		// translate to bits
 	rx = rx*8/detect_interval;
 	var tx_kb = tx/1024;
@@ -374,19 +420,31 @@ function show_clients(priority_type){
 			code += '<img id="imgUserIcon_'+ i +'" class="imgUserIcon" src="' + userIconBase64 + '">';
 			code += '</div>';
 		}
-		else {
+		else if( (clientObj.type != "0" && clientObj.type != "6") || clientObj.dpiVender == "") {
 			code += '<div id="icon_' + i + '" onclick="show_apps(this);" class="closed trafficIcons type' + clientObj.type + ' qosLevel' + clientObj.qosLevel + '"></div>';
-		}			
+		}
+		else if(clientObj.dpiVender != "") {
+			var clientListCSS = "";
+			var venderIconClassName = getVenderIconClassName(clientObj.dpiVender.toLowerCase());
+			if(venderIconClassName != "") {
+				clientListCSS = "trafficVenderIcons " + venderIconClassName;
+			}
+			else {
+				clientListCSS = "trafficIcons type" + clientObj.type;
+			}
+			code += '<div id="icon_' + i + '" onclick="show_apps(this);" class="closed ' + clientListCSS + ' qosLevel' + clientObj.qosLevel + '"></div>';
+		}
 		code += '</td>';
 		code += '<td style="width:180px;">';
 
-		if(clientObj.name.length > 23){
-			short_name = clientObj.name.substr(0,20) + "...";	
+		var clientName = (clientObj.nickName == "") ? clientObj.name : clientObj.nickName;
+		if(clientName.length > 23){
+			short_name = clientName.substr(0,20) + "...";	
 			//code += '<div style="font-family:Courier New,Courier,mono;" title="' + clientObj.mac + '&#10'+ clientObj.name +'">'+ short_name +'</div>';	
 			code += '<div style="font-family:Courier New,Courier,mono;" title="' + clientObj.mac + '">'+ short_name +'</div>';			
 		}
 		else{
-			code += '<div style="font-family:Courier New,Courier,mono;" title="' + clientObj.mac + '">'+ clientObj.name +'</div>';			
+			code += '<div style="font-family:Courier New,Courier,mono;" title="' + clientObj.mac + '">'+ clientName +'</div>';			
 		}
 	
 		code += '</td>';		
@@ -467,10 +525,23 @@ function show_apps(obj){
 		parent_obj_temp.appendChild(last_element);
 		register_event();
 		if(children_obj != undefined) {
-			obj.setAttribute("class", "closed qosLevel" + clientObj.qosLevel);
+			obj.setAttribute("class", "closed qosLevel" + clientObj.qosLevel + " divUserIcon");
 		}
 		else {
-			obj.setAttribute("class", "closed trafficIcons type" + clientObj.type + " qosLevel" + clientObj.qosLevel);
+			if( (clientObj.type != "0" && clientObj.type != "6") || clientObj.dpiVender == "") {
+				obj.setAttribute("class", "closed trafficIcons type" + clientObj.type + " qosLevel" + clientObj.qosLevel + " divUserIcon");
+			}
+			else if(clientObj.dpiVender != "") {
+				var clientListCSS = "";
+				var venderIconClassName = getVenderIconClassName(clientObj.dpiVender.toLowerCase());
+				if(venderIconClassName != "") {
+					clientListCSS = "trafficVenderIcons " + venderIconClassName;
+				}
+				else {
+					clientListCSS = "trafficIcons type" + clientObj.type;
+				}
+				obj.setAttribute("class", "closed " + clientListCSS + " qosLevel" + clientObj.qosLevel + " divUserIcon");
+			}
 		}
 	}
 	else{
@@ -494,10 +565,23 @@ function show_apps(obj){
 		parent_obj.appendChild(new_element);
 		parent_obj.appendChild(last_element);
 		if(children_obj != undefined) {
-			obj.setAttribute("class", "opened clicked qosLevel" + clientObj.qosLevel);
+			obj.setAttribute("class", "opened clicked qosLevel" + clientObj.qosLevel + " divUserIcon");
 		}
 		else {
-			obj.setAttribute("class", "opened trafficIcons_clicked type" + clientObj.type + " clicked qosLevel" + clientObj.qosLevel);
+			if( (clientObj.type != "0" && clientObj.type != "6") || clientObj.dpiVender == "") {
+				obj.setAttribute("class", "opened trafficIcons_clicked type" + clientObj.type + " clicked qosLevel" + clientObj.qosLevel + " divUserIcon");
+			}
+			else if(clientObj.dpiVender != "") {
+				var clientListCSS = "";
+				var venderIconClassName = getVenderIconClassName(clientObj.dpiVender.toLowerCase());
+				if(venderIconClassName != "") {
+					clientListCSS = "trafficVenderIcons_clicked " + venderIconClassName;
+				}
+				else {
+					clientListCSS = "trafficIcons_clicked type" + clientObj.type;
+				}
+				obj.setAttribute("class", "opened " + clientListCSS + " clicked qosLevel" + clientObj.qosLevel + " divUserIcon");
+			}
 		}
 		update_device_tarffic();
 		update_apps_tarffic(client_mac, obj, new_element);		
@@ -529,10 +613,23 @@ function cancel_previous_device_apps(obj){
 	parent_obj_temp.appendChild(first_element);
 	parent_obj_temp.appendChild(last_element);
 	if(children_obj != undefined) {
-		obj.setAttribute("class", "closed qosLevel" + clientObj.qosLevel);
+		obj.setAttribute("class", "closed qosLevel" + clientObj.qosLevel + " divUserIcon");
 	}
 	else {
-		obj.setAttribute("class", "closed trafficIcons type" + clientObj.type + " qosLevel" + clientObj.qosLevel);
+		if( (clientObj.type != "0" && clientObj.type != "6") || clientObj.dpiVender == "") {
+			obj.setAttribute("class", "closed trafficIcons type" + clientObj.type + " qosLevel" + clientObj.qosLevel + " divUserIcon");
+		}
+		else if(clientObj.dpiVender != "") {
+			var clientListCSS = "";
+			var venderIconClassName = getVenderIconClassName(clientObj.dpiVender.toLowerCase());
+			if(venderIconClassName != "") {
+				clientListCSS = "trafficVenderIcons " + venderIconClassName;
+			}
+			else {
+				clientListCSS = "trafficIcons type" + clientObj.type;
+			}
+			obj.setAttribute("class", "closed " + clientListCSS + " qosLevel" + clientObj.qosLevel + " divUserIcon");
+		}
 	}
 }
 
@@ -595,7 +692,7 @@ function render_apps(apps_array, obj_icon, apps_field){
 	}
 
 	if(code == ""){
-		code = "<tr><td colspan='3' style='text-align:center;color:#FFCC00'><div style='padding:5px 0px;border-top:solid 1px #333;'>No Traffic in the list</div></td></tr>";
+		code = "<tr><td colspan='3' style='text-align:center;color:#FFCC00'><div style='padding:5px 0px;border-top:solid 1px #333;'><#Bandwidth_monitor_noList#></div></td></tr>";	/*No Traffic in the list*/
 	}
 
 	$(apps_field).empty();
@@ -625,12 +722,32 @@ function calculate_traffic(array_traffic){
 			var tx_width = 0;
 			var rx_width = 0;
 			
-			diff_tx = (client_traffic_old[client_traffic_new[i]]) ? client_traffic_new[client_traffic_new[i]].tx - client_traffic_old[client_traffic_new[i]].tx : 0;
-			diff_rx = (client_traffic_old[client_traffic_new[i]]) ? client_traffic_new[client_traffic_new[i]].rx - client_traffic_old[client_traffic_new[i]].rx : 0;
+			if(client_traffic_old[client_traffic_new[i]]){
+				if((client_traffic_new[client_traffic_new[i]].tx - client_traffic_old[client_traffic_new[i]].tx) < 0){
+					diff_tx = (parseInt(client_traffic_new[client_traffic_new[i]].tx) + Math.pow(2,32)) - client_traffic_old[client_traffic_new[i]].tx;
+				}
+				else{
+					diff_tx = client_traffic_new[client_traffic_new[i]].tx - client_traffic_old[client_traffic_new[i]].tx;
+				}			
+			}
+			else{
+				diff_tx = 0;
+			}
+			
+			if(client_traffic_old[client_traffic_new[i]]){
+				if((client_traffic_new[client_traffic_new[i]].rx - client_traffic_old[client_traffic_new[i]].rx) < 0){
+					diff_rx = (parseInt(client_traffic_new[client_traffic_new[i]].rx) + Math.pow(2,32)) - client_traffic_old[client_traffic_new[i]].rx;
+				}
+				else{
+					diff_rx = client_traffic_new[client_traffic_new[i]].rx - client_traffic_old[client_traffic_new[i]].rx;
+				}
+			}
+			else{
+				diff_rx = 0;
+			}
 			
 			diff_tx = diff_tx*8/detect_interval;
 			diff_rx = diff_rx*8/detect_interval;
-	
 			diff_tx_kb = diff_tx/1024;
 			diff_rx_kb = diff_rx/1024;
 			diff_tx_mb = diff_tx/1024/1024;
@@ -644,55 +761,69 @@ function calculate_traffic(array_traffic){
 					}
 					catch(e){
 						console.log("[" + i + "] " + client_traffic_new[i]);
+						continue;
 					}
 				}
 				else{				
 					tx_width = parseInt(diff_tx_kb/(upload_maximum/5)*30);
 					if(diff_tx_kb.toFixed(1) >= 0.1 && tx_width < 1)
 						tx_width = 1;
-					
-					document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
+
+					if(document.getElementById(client_traffic_new[i]+'_upload_bar') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload_bar') != null){
+						document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
+					}
 				}
 
 				if(diff_tx_kb < 1024){	
-					document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_kb.toFixed(1);
-					document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Kb";	
+					if(document.getElementById(client_traffic_new[i]+'_upload') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload') != null){
+						document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_kb.toFixed(1);
+						document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Kb";	
+					}
 				}
 				else{
-					document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) ; 
-					document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";	
+					if(document.getElementById(client_traffic_new[i]+'_upload') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload') != null){
+						document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) ; 
+						document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";	
+					}
 				}
 			}
 			else if((diff_tx_kb >= upload_maximum/5) && (diff_tx_kb < upload_maximum*2/5)){
 				tx_width = parseInt((diff_tx_kb - (upload_maximum/5))/(upload_maximum/5)*25);
 				tx_width += 30;
-				document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
-				document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
-				document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";			
+				if(document.getElementById(client_traffic_new[i]+'_upload') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload') != null){
+					document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
+					document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
+					document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";
+				}
 			}
 			else if((diff_tx_kb >= upload_maximum*2/5) && (diff_tx_kb < upload_maximum*3/5)){
 				tx_width = parseInt((diff_tx_kb - (upload_maximum*2/5))/(upload_maximum/5)*20);
 				tx_width += 55;
-				document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
-				document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
-				document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";	
+				if(document.getElementById(client_traffic_new[i]+'_upload') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload') != null){
+					document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
+					document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
+					document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";
+				}
 			}
 			else if((diff_tx_kb >= upload_maximum*3/5) && (diff_tx_kb < upload_maximum*4/5)){
 				tx_width = parseInt((diff_tx_kb - (upload_maximum*3/5))/(upload_maximum/5)*15);
 				tx_width += 75;
-				document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
-				document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
-				document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";
+				if(document.getElementById(client_traffic_new[i]+'_upload') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload') != null){
+					document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
+					document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
+					document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";
+				}
 			}
 			else{
 				tx_width = parseInt((diff_tx_kb - (upload_maximum*4/5))/(upload_maximum/5)*15);
 				tx_width += 90;
 				if(tx_width > 100)
 					tx_width = 100;
-					
-				document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
-				document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
-				document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";				
+				if(document.getElementById(client_traffic_new[i]+'_upload') != "undefined" && document.getElementById(client_traffic_new[i]+'_upload') != null){
+					document.getElementById(client_traffic_new[i]+'_upload_bar').style.width = tx_width + "%";
+					document.getElementById(client_traffic_new[i]+'_upload').innerHTML = diff_tx_mb.toFixed(1) 
+					document.getElementById(client_traffic_new[i]+'_upload_unit').innerHTML = "Mb";
+				}
 			}
 				
 			// download traffic
@@ -703,45 +834,57 @@ function calculate_traffic(array_traffic){
 					}
 					catch(e){
 						console.log("[" + i + "] " + client_traffic_new[i]);
+						continue;
 					}			
 				}	
 				else{
 					rx_width = parseInt(diff_rx_kb/(download_maximum/5)*30);
 					if( diff_rx_kb.toFixed(1) >= 0.1 &&  rx_width < 1)
 						rx_width = 1;
-						
-					document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";
+					if(document.getElementById(client_traffic_new[i]+'_download_bar') != "undefined" && document.getElementById(client_traffic_new[i]+'_download_bar') != null){	
+						document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";
+					}
 				}	
 					
 				if(diff_rx_kb < 1024){
-					document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_kb.toFixed(1);
-					document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Kb";			
+					if(document.getElementById(client_traffic_new[i]+'_download') != "undefined" && document.getElementById(client_traffic_new[i]+'_download') != null){	
+						document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_kb.toFixed(1);
+						document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Kb";			
+					}
 				}
 				else{
-					document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
-					document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";				
+					if(document.getElementById(client_traffic_new[i]+'_download') != "undefined" && document.getElementById(client_traffic_new[i]+'_download') != null){	
+						document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
+						document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";				
+					}
 				}									
 			}
 			else if((diff_rx_kb >= download_maximum/5) && (diff_rx_kb < download_maximum*2/5)){		//	25%
 				rx_width = parseInt((diff_rx_kb - (download_maximum/5))/(download_maximum/5)*25);
 				rx_width += 30;
-				document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";
-				document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
-				document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				if(document.getElementById(client_traffic_new[i]+'_download') != "undefined" && document.getElementById(client_traffic_new[i]+'_download') != null){	
+					document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";
+					document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
+					document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";
+				}
 			}
 			else if((diff_rx_kb >= download_maximum*2/5) && (diff_rx_kb < download_maximum*3/5)){		// 20%
 				rx_width = parseInt((diff_rx_kb - (download_maximum*2/5))/(download_maximum/5)*20);
 				rx_width += 55;
-				document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";				
-				document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
-				document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				if(document.getElementById(client_traffic_new[i]+'_download') != "undefined" && document.getElementById(client_traffic_new[i]+'_download') != null){	
+					document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";				
+					document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
+					document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				}
 			}
 			else if((diff_rx_kb >= download_maximum*3/5) && (diff_rx_kb <download_maximum*4/5)){		//	15%
 				rx_width = parseInt((diff_rx_kb - (download_maximum*3/5))/(download_maximum/5)*15);
 				rx_width += 75;
-				document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";	
-				document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
-				document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				if(document.getElementById(client_traffic_new[i]+'_download') != "undefined" && document.getElementById(client_traffic_new[i]+'_download') != null){		
+					document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";	
+					document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
+					document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				}
 			}
 			else{		//10%
 				rx_width = parseInt((diff_rx_kb - (download_maximum*4/5))/(download_maximum/5)*10);
@@ -749,9 +892,11 @@ function calculate_traffic(array_traffic){
 				if(rx_width > 100)
 					rx_width = 100;
 				
-				document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";	
-				document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
-				document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				if(document.getElementById(client_traffic_new[i]+'_download') != "undefined" && document.getElementById(client_traffic_new[i]+'_download') != null){	
+					document.getElementById(client_traffic_new[i]+'_download_bar').style.width = rx_width + "%";	
+					document.getElementById(client_traffic_new[i]+'_download').innerHTML = diff_rx_mb.toFixed(1);
+					document.getElementById(client_traffic_new[i]+'_download_unit').innerHTML = "Mb";	
+				}
 			}	
 		}	
 	}
@@ -1015,30 +1160,6 @@ function applyRule(){
 	document.form.submit();
 }
 
-function cal_agreement_block(){
-	var blockmarginLeft;
-	if (window.innerWidth)
-		winWidth = window.innerWidth;
-	else if ((document.body) && (document.body.clientWidth))
-		winWidth = document.body.clientWidth;
-		
-	if (document.documentElement  && document.documentElement.clientHeight && document.documentElement.clientWidth){
-		winWidth = document.documentElement.clientWidth;
-	}
-
-	if(winWidth >1050){	
-		winPadding = (winWidth-1050)/2;	
-		winWidth = 1105;
-		blockmarginLeft= (winWidth*0.25)+winPadding;
-	}
-	else if(winWidth <=1050){
-		blockmarginLeft= (winWidth)*0.25+document.body.scrollLeft;	
-
-	}
-
-	document.getElementById("agreement_panel").style.marginLeft = blockmarginLeft+"px";
-}
-
 function eula_confirm(){
 	document.form.TM_EULA.value = 1;
 	document.form.apps_analysis.value = 1;
@@ -1057,7 +1178,7 @@ function cancel(){
 <body onload="initial();" onunload="unload_body();">
 <div id="TopBanner"></div>
 <div id="Loading" class="popup_bg"></div>
-<div id="agreement_panel" class="panel_folder" style="margin-top: -100px;display:none;position:absolute;"></div>
+<div id="agreement_panel" class="panel_folder" style="margin-top: -100px;"></div>
 <div id="hiddenMask" class="popup_bg" style="z-index:999;">
 	<table cellpadding="5" cellspacing="0" id="dr_sweet_advise" class="dr_sweet_advise" align="center">
 	</table>
@@ -1124,7 +1245,7 @@ function cancel(){
 																				});
 																			}	
 																			dr_advise();
-																			cal_agreement_block();
+																			cal_panel_block("agreement_panel", 0.25);
 																			$("#agreement_panel").fadeIn(300);
 																			return false;
 																		}
@@ -1156,7 +1277,7 @@ function cancel(){
 									<table style="width:99%;">
 										<tr>
 											<td id="upload_unit" style="width:50%;">
-												<div style="position:absolute;margin-left:75px;font-size:16px;">Upload</div>
+												<div style="margin:-10px 0 5px 70px;font-size:16px;text-align:center;"><#upload_bandwidth#></div>
 												<div style="position:absolute;margin:12px 0px 0px 112px;font-size:16px;display:none;"></div>
 												<div style="position:absolute;margin:-8px 0px 0px 222px;font-size:16px;display:none;"></div>
 												<div style="position:absolute;margin:50px 0px 0px 300px;font-size:16px;display:none;"></div>
@@ -1167,7 +1288,7 @@ function cancel(){
 												<div id="indicator_upload" style="background-image:url('images/New_ui/indicator.png');position:absolute;height:100px;width:50px;background-repeat:no-repeat;margin:-110px 0px 0px 194px;"></div>
 											</td>
 											<td id="download_unit">	
-												<div style="position:absolute;font-size:16px;">Download</div>
+												<div style="margin:-10px 0 5px -55px;font-size:16px;text-align:center;"><#download_bandwidth#></div>
 												<div style="position:absolute;margin:12px 0px 0px 88px;font-size:16px;display:none;"></div>
 												<div style="position:absolute;margin:-6px 0px 0px 203px;font-size:16px;display:none;"></div>
 												<div style="position:absolute;margin:50px 0px 0px 275px;font-size:16px;display:none;"></div>

@@ -216,11 +216,7 @@ function genBWTable(_unit){
 			}
 		}
 		else{
-			if(document.form.preferred_lang.value == "UK"){    //use unique font-family for JP
-				bws = [0, 1, 2];
-				bwsDesc = ["20/40 MHz", "20 MHz", "40 MHz"];
-			}
-			else if (!band5g_11ac_support){	//for RT-N66U SDK 6.x
+			if (!band5g_11ac_support){	//for RT-N66U SDK 6.x
 				bws = [0, 1, 2];
 				bwsDesc = ["20/40 MHz", "20 MHz", "40 MHz"];		
 			}else if (based_modelid == "RT-AC87U"){
@@ -291,7 +287,7 @@ function applyRule(){
 
 	if(validForm()){
         if(document.form.wl_closed[0].checked && document.form.wps_enable.value == 1){ 
-            if(!confirm("Selecting Hide SSID will disable WPS. Are you sure?")){
+            if(!confirm("<#wireless_JS_Hide_SSID#>")){	/*Selecting Hide SSID will disable WPS. Are you sure ?*/
                 return false;           
             }
  
@@ -301,14 +297,14 @@ function applyRule(){
         if(document.form.wps_enable.value == 1){
             if(document.form.wps_dualband.value == "1" || document.form.wl_unit.value == document.form.wps_band.value){         //9: RT-AC87U dual band WPS
                 if(document.form.wl_auth_mode_x.value == "open" && document.form.wl_wep_x.value == "0"){
-					if(!confirm("Are you sure to configure WPS in Open System (no security) ?"))
+					if(!confirm("<#wireless_JS_WPS_open#>"))	/*Are you sure to configure WPS in Open System (no security) ?*/
 						return false;           
                 }
                 
                 if( document.form.wl_auth_mode_x.value == "shared"
                  || document.form.wl_auth_mode_x.value == "psk" || document.form.wl_auth_mode_x.value == "wpa"
                  || document.form.wl_auth_mode_x.value == "open" && (document.form.wl_wep_x.value == "1" || document.form.wl_wep_x.value == "2")){              //open wep case
-                    if(!confirm("Selecting WEP or TKIP Encryption will disable the WPS. Are you sure ?"))
+                    if(!confirm("<#wireless_JS_disable_WPS#>"))	/*Selecting WEP or TKIP Encryption will disable the WPS. Are you sure ?*/
                         return false;   
 					
                     document.form.wps_enable.value = "0";   
@@ -316,7 +312,7 @@ function applyRule(){
             }
 			else{
 				if(document.form.wl_auth_mode_x.value == "open" && document.form.wl_wep_x.value == "0"){
-					if(!confirm("Are you sure to configure WPS in Open System (no security) ?"))
+					if(!confirm("<#wireless_JS_WPS_open#>"))
 						return false;		
 				}
 			}
@@ -445,7 +441,7 @@ function checkBW(){
 	if(document.form.wl_channel.value != 0 && document.form.wl_bw.value == 0){	//Auto but set specific channel
 		if(document.form.wl_channel.value == "165")	// channel 165 only for 20MHz
 			document.form.wl_bw.selectedIndex = 1;
-		else if('<% nvram_get("wl_unit"); %>' == 0 || document.form.preferred_lang.value == "UK")	//2.4GHz or UK for 40MHz
+		else if('<% nvram_get("wl_unit"); %>' == 0)	//2.4GHz for 40MHz
 			document.form.wl_bw.selectedIndex = 2;
 		else{	//5GHz else for 80MHz
 			if(band5g_11ac_support)
@@ -705,7 +701,7 @@ function regen_auto_option(obj){
 			<table width="99%" border="1" align="center" cellpadding="4" cellspacing="0" id="WLgeneral" class="FormTable">
 
 			<tr id="smartcon_enable_field" style="display:none;">
-			  	<th width="30%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(13,1);">Enabled Smart Connect</a></th>
+			  	<th width="30%"><a class="hintstyle" href="javascript:void(0);" onClick="openHint(13,1);"><#smart_connect_enable#></a></th>	<!-- Enable Smart Connect -->
 			  	<td>
 			    	<div id="smartcon_enable_block" style="display:none;">
 			    		<span style="color:#FFF;" id="smart_connect_enable_word">&nbsp;&nbsp;</span>
@@ -806,8 +802,8 @@ function regen_auto_option(obj){
 					</th>
 					<td>
 				 		<select name="wl_channel" class="input_option" onChange="change_channel(this);"></select>
-						<span id="dfs_checkbox" style="display:none;"><input type="checkbox" onClick="check_DFS_support(this);" name="acs_dfs_checkbox" <% nvram_match("acs_dfs", "1", "checked"); %>>Auto select channel including DFS channels</input></span>
-						<span id="acs_band1_checkbox" style="display:none;"><input type="checkbox" onClick="check_acs_band1_support(this);"  <% nvram_match("acs_band1", "1", "checked"); %>>Auto select channel including band1 channels</input></span>
+						<span id="dfs_checkbox" style="display:none;"><input type="checkbox" onClick="check_DFS_support(this);" name="acs_dfs_checkbox" <% nvram_match("acs_dfs", "1", "checked"); %>><#WLANConfig11b_EChannel_dfs#></input></span>
+						<span id="acs_band1_checkbox" style="display:none;"><input type="checkbox" onClick="check_acs_band1_support(this);" <% nvram_match("acs_band1", "1", "checked"); %>><#WLANConfig11b_EChannel_band1#></input></span>
 					</td>
 			  </tr> 
 		  	<!-- end -->
@@ -907,12 +903,12 @@ function regen_auto_option(obj){
 			  	</tr>
 			  
 				<tr style="display:none">
-					<th>Protected Management Frames</th>
+					<th><#WLANConfig11b_x_mfp#></th>	<!-- Protected Management Frames -->
 					<td>
 				  		<select name="wl_mfp" class="input_option" >
 								<option value="0" <% nvram_match("wl_mfp", "0", "selected"); %>><#WLANConfig11b_WirelessCtrl_buttonname#></option>
-								<option value="1" <% nvram_match("wl_mfp", "1", "selected"); %>>Capable</option>
-								<option value="2" <% nvram_match("wl_mfp", "2", "selected"); %>>Required</option>
+								<option value="1" <% nvram_match("wl_mfp", "1", "selected"); %>><#WLANConfig11b_x_mfp_opt1#></option>	<!-- Capable -->
+								<option value="2" <% nvram_match("wl_mfp", "2", "selected"); %>><#WLANConfig11b_x_mfp_opt2#></option>	<!-- Required -->
 				  		</select>
 					</td>
 			  	</tr>

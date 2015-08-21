@@ -41,10 +41,6 @@
 
 #define IFUP (IFF_UP | IFF_RUNNING | IFF_BROADCAST | IFF_MULTICAST)
 
-#define DUT_DOMAIN_NAME "router.asus.com"
-#define OLD_DUT_DOMAIN_NAME1 "www.asusnetwork.net"
-#define OLD_DUT_DOMAIN_NAME2 "www.asusrouter.com"
-
 #define USBCORE_MOD	"usbcore"
 #if defined (RTCONFIG_USB_XHCI)
 #if defined(RTCONFIG_ETRON_XHCI)
@@ -230,7 +226,7 @@ extern int setMAC_5G(const char *mac);
 extern int getRegSpec(void);
 extern int getRegDomain_2G(void);
 extern int getRegDomain_5G(void);
-extern int setRegSpec(const char *regSpec);
+extern int setRegSpec(const char *regSpec, int do_write);
 extern int setRegDomain_2G(const char *cc);
 extern int setRegDomain_5G(const char *cc);
 #else
@@ -344,8 +340,13 @@ extern void restore_defaults_module(char *prefix);
 extern void clean_modem_state(int flag);
 
 // interface.c
-extern int _ifconfig(const char *name, int flags, const char *addr, const char *netmask, const char *dstaddr);
-#define ifconfig(name, flags, addr, netmask) _ifconfig(name, flags, addr, netmask, NULL)
+extern int _ifconfig(const char *name, int flags, const char *addr, const char *netmask, const char *dstaddr, int mtu);
+static inline int ifconfig(const char *name, int flags, const char *addr, const char *netmask)
+{
+	return _ifconfig(name, flags, addr, netmask, NULL, 0);
+}
+extern int _ifconfig_get(const char *name, int *flags, char *addr, char *netmask, char *dstaddr, int *mtu);
+extern int ifconfig_mtu(const char *name, int mtu);
 extern int route_add(char *name, int metric, char *dst, char *gateway, char *genmask);
 extern int route_del(char *name, int metric, char *dst, char *gateway, char *genmask);
 extern int start_vlan(void);
@@ -362,6 +363,9 @@ extern int wan_ifunit(char *wan_ifname);
 extern int wanx_ifunit(char *wan_ifname);
 extern int preset_wan_routes(char *wan_ifname);
 extern int found_default_route(int wan_unit);
+#ifdef RTCONFIG_QCA_PLC_UTILS
+extern int autodet_plc_main(int argc, char *argv[]);
+#endif
 extern int autodet_main(int argc, char *argv[]);
 extern void start_wan(void);
 extern void stop_wan(void);
@@ -386,6 +390,7 @@ extern int test_gateway(char *gw, char *wan_ifname);
 #else
 static inline int test_gateway(char *gw, char *wan_ifname) { return 0; }
 #endif
+extern int do_dns_detect();
 
 // lan.c
 extern void update_lan_state(int state, int reason);
@@ -807,6 +812,9 @@ extern void dsl_defaults(void);
 
 //services.c
 extern void write_static_leases(char *file);
+#ifdef RTCONFIG_DHCP_OVERRIDE
+extern int restart_dnsmasq(int need_link_DownUp);
+#endif
 extern void start_dnsmasq(void);
 extern void stop_dnsmasq(void);
 extern void reload_dnsmasq(void);
@@ -815,16 +823,6 @@ extern int ddns_updated_main(int argc, char *argv[]);
 extern void add_ip6_lanaddr(void);
 extern void start_ipv6_tunnel(void);
 extern void stop_ipv6_tunnel(void);
-#ifdef RTCONFIG_WIDEDHCP6
-extern void start_radvd(void);
-extern void stop_radvd(void);
-extern void start_dhcp6s(void);
-extern void stop_dhcp6s(void);
-extern void start_rdisc6(void);
-extern void stop_rdisc6(void);
-extern void start_rdnssd(void);
-extern void stop_rdnssd(void);
-#endif /* RTCONFIG_WIDEDHCP6 */
 extern void start_ipv6(void);
 extern void stop_ipv6(void);
 extern void ipv6_sysconf(const char *ifname, const char *name, int value);
@@ -887,6 +885,9 @@ extern void stop_rstats(void);
 extern void stop_autodet(void);
 extern void start_autodet(void);
 extern int wps_band_ssid_broadcast_off(int wps_band);
+#ifdef RTCONFIG_QCA_PLC_UTILS
+extern void start_plcdet(void);
+#endif
 extern void start_httpd(void);
 extern int wl_wpsPincheck(char *pin_string);
 extern int start_wps_pbc(int unit);
@@ -918,8 +919,8 @@ extern int start_dsl_diag(void);
 #endif
 #endif
 #ifdef RTCONFIG_PUSH_EMAIL
-#ifdef RTCONFIG_DSL_TCLINUX
 extern void start_DSLsendmail(void);
+#ifdef RTCONFIG_DSL_TCLINUX
 extern void start_DSLsenddiagmail(void);
 #endif
 #endif
@@ -1036,6 +1037,18 @@ extern void start_roamast(void);
 extern int roam_assistant_main(int argc, char *argv[]);
 #endif
 
+#ifdef RTCONFIG_DHCP_OVERRIDE
+extern int detectWAN_arp_main(int argc, char **argv);
+#endif
+
+#ifdef RTCONFIG_PUSH_EMAIL
+extern void am_send_mail(int type, char *path);
+#endif
+
+#ifdef RTCONFIG_TRAFFIC_CONTROL
+extern void traffic_control_sendSMS(int flag);
+#endif
+
 #ifdef BTN_SETUP
 enum BTNSETUP_STATE
 {
@@ -1047,6 +1060,40 @@ enum BTNSETUP_STATE
 	BTNSETUP_DATAEXCHANGE_EXTEND,
 	BTNSETUP_FINISH
 };
+#endif
+
+#ifdef RTCONFIG_TUNNEL
+extern void start_mastiff();
+extern void stop_mastiff();
+#endif
+
+#if defined(RTCONFIG_TCODE) && defined(CONFIG_BCMWL5)
+extern char *cfe_nvram_get(const char *name);
+static INLINE int
+cfe_nvram_match(char *name, char *match) {
+	const char *value = cfe_nvram_get(name);
+	return (value && !strcmp(value, match));
+}
+extern char *cfe_nvram_safe_get(const char *name);
+extern char *cfe_nvram_get_raw(const char *name);
+extern char *cfe_nvram_safe_get_raw(const char *name);
+extern int cfe_nvram_set(const char *name);
+extern int factory_debug();
+#if !(defined(RTCONFIG_CFEZ) && defined(RTCONFIG_BCMARM))
+extern char *ATE_BRCM_PREFIX(void);
+extern int ATE_BRCM_SET(const char *name, const char *value);
+extern void ATE_BRCM_COMMIT(void);
+#endif
+#endif
+
+#if defined(RTCONFIG_LACP)
+void config_lacp(void);
+#endif
+
+#ifdef RTCONFIG_DUALWAN
+#ifdef CONFIG_BCMWL5
+void dualwan_control(void);
+#endif
 #endif
 
 #endif	/* __RC_H__ */

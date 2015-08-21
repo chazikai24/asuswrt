@@ -57,6 +57,7 @@
 <script type="text/javascript" src="/help.js"></script>
 <script type="text/javascript" src="/wcdma_list.js"></script>
 <script type="text/javaScript" src="/jquery.js"></script>
+<script type="text/javascript" src="/switcherplugin/jquery.iphone-switch.js"></script>
 <script>
 
 var modem = '<% nvram_get("Dev3G"); %>';
@@ -77,28 +78,18 @@ var daillist = new Array();
 var userlist = new Array();
 var passlist = new Array();
 
-/* start of DualWAN */ 
+/* start of DualWAN */
 var wans_dualwan = '<% nvram_get("wans_dualwan"); %>';
+var usb_modem_enable = 0;
 <% wan_get_parameter(); %>
-
-
-if(dualWAN_support && wans_dualwan.search("usb") >= 0 ){
-	var wan_type_name = wans_dualwan.split(" ")[<% nvram_get("wan_unit"); %>];
-	wan_type_name = wan_type_name.toUpperCase();
-	switch(wan_type_name){
-		case "DSL":
-			location.href = "Advanced_DSL_Content.asp";
-			break;
-		case "WAN":
-			location.href = "Advanced_WAN_Content.asp";
-			break;
-		case "LAN":
-			location.href = "Advanced_WAN_Content.asp";
-			break;	
-		default:
-			break;	
-	}
+if(dualWAN_support){
+	usb_modem_enable = (usb_index >= 0)? 1:0;
 }
+else{
+	usb_modem_enable = ('<% nvram_get("modem_enable"); %>' != "0")? 1:0;
+}
+var modem_android_orig = '<% nvram_get("modem_android"); %>';
+
 
 function genWANSoption(){
 	for(i=0; i<wans_dualwan.split(" ").length; i++){
@@ -117,19 +108,79 @@ function genWANSoption(){
 	
 function initial(){
 	show_menu();
+
 	if(dualWAN_support && '<% nvram_get("wans_dualwan"); %>'.search("none") < 0){
-				genWANSoption();
+		genWANSoption();
 	}
 	else{
 		document.form.wan_unit.disabled = true;
-		document.getElementById("WANscap").style.display = "none";	
+		document.getElementById("WANscap").style.display = "none";
 	}
 
-	switch_modem_mode('<% nvram_get("modem_enable"); %>');
-	gen_country_list();
-	reloadProfile();
+	if(usb_modem_enable){
+		document.getElementById("modem_android_tr").style.display="";
+		if(modem_android_orig == "0"){
+			switch_modem_mode('<% nvram_get("modem_enable"); %>');
+			gen_country_list();
+			reloadProfile();
+		}
+		else{
+			hide_usb_settings();
+			document.getElementById("android_desc").style.display="";
+		}
+	}
+	else{
+		hide_usb_settings();
+	}	
 
-	if(!dualWAN_support){		
+	if(dualWAN_support){
+		$('#usb_modem_switch').iphoneSwitch(usb_modem_enable,
+			function() {
+				document.form.wans_dualwan.value = wans_dualwan_array[0]+" usb";
+				document.getElementById("modem_android_tr").style.display="";
+				if(document.form.modem_android.value == "0"){
+					switch_modem_mode(document.form.modem_enable.value);
+					gen_country_list();
+					reloadProfile();
+				}
+				else{
+					document.getElementById("android_desc").style.display="";					
+					hide_usb_settings();
+				}				
+			},
+			function() {
+				if(usb_index == 0)
+					document.form.wans_dualwan.value = wans_dualwan_array[1]+" none";
+				else
+					document.form.wans_dualwan.value = wans_dualwan_array[0]+" none";
+				document.getElementById("modem_android_tr").style.display="none";
+				hide_usb_settings();
+			}
+		);
+	}
+	else{
+		document.form.wans_dualwan.disalbed = true;
+		$('#usb_modem_switch').iphoneSwitch(usb_modem_enable,
+			function() {
+				document.getElementById("modem_android_tr").style.display="";
+				if(document.form.modem_android.value == "0"){
+					switch_modem_mode(document.form.modem_enable.value);
+					gen_country_list();
+					reloadProfile();
+				}
+				else{
+					document.getElementById("android_desc").style.display="";					
+					hide_usb_settings();
+				}				
+			},
+			function() {
+				document.getElementById("modem_android_tr").style.display="none";
+				hide_usb_settings();
+			}
+		);
+	}
+
+	if(!dualWAN_support){
 		document.getElementById("_APP_Installation").innerHTML = '<table><tbody><tr><td><div class="_APP_Installation"></div></td><td><div style="width:120px;"><#Menu_usb_application#></div></td></tr></tbody></table>';
 		document.getElementById("_APP_Installation").className = "menu_clicked";
 	}
@@ -142,8 +193,9 @@ function initial(){
 			}
 		}
   }
-	//change_wan_unit(document.form.wan_unit);
-	check_dongle_status();	
+
+	check_dongle_status();
+
 }
 
 function reloadProfile(){
@@ -449,7 +501,7 @@ function applyRule(){
 		document.form.modem_isp.options.length = 1;
 		document.form.modem_isp.options[0] = new Option(valueStr, valueStr, false, true);
 	}
-
+console.log("document.form.wan_unit.value = "+document.form.wan_unit.value);
 	showLoading(); 
 	document.form.submit();
 }
@@ -544,6 +596,34 @@ function check_dongle_status(){
        }
    });
 }
+
+function hide_usb_settings(){
+	inputCtrl(document.form.Dev3G, 0);
+	inputCtrl(document.form.modem_enable_option, 0);
+	inputCtrl(document.form.modem_country, 0);
+	inputCtrl(document.form.modem_isp, 0);
+	inputCtrl(document.form.modem_apn, 0);
+	if(pin_opt) inputCtrl(document.form.modem_pincode, 0);
+	inputCtrl(document.form.modem_dialnum, 0);
+	inputCtrl(document.form.modem_user, 0);
+	inputCtrl(document.form.modem_pass, 0);
+	inputCtrl(document.form.modem_ttlsid, 0);
+}
+
+function select_usb_device(obj){
+	if(obj.selectedIndex == 0){
+		switch_modem_mode(document.form.modem_enable_option.value);
+		gen_country_list();
+		reloadProfile();
+		document.getElementById("android_desc").style.display="none";
+	}
+	else{
+		document.getElementById("android_desc").style.display="";
+		hide_usb_settings();
+	}
+
+}
+
 </script>
 </head>
 
@@ -580,6 +660,7 @@ function check_dongle_status(){
 <input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
 <input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
 <input type="hidden" name="modem_enable" value="<% nvram_get("modem_enable"); %>">
+<input type="hidden" name="wans_dualwan" value="<% nvram_get("wans_dualwan"); %>">
 
 <table class="content" align="center" cellpadding="0" cellspacing="0">
   <tr>
@@ -606,7 +687,7 @@ function check_dongle_status(){
 					<table width="730px">
 						<tr>
 							<td align="left">
-								<span class="formfonttitle"><#menu5_4_4#></span>
+								<span class="formfonttitle"><#menu5_4_4#> / <#usb_tethering#></span>
 							</td>
 							<td align="right">
 								<img onclick="go_setting('/APP_Installation.asp')" align="right" style="cursor:pointer;position:absolute;margin-left:-20px;margin-top:-30px;" title="<#Menu_usb_application#>" src="/images/backprev.png" onMouseOver="this.src='/images/backprevclick.png'" onMouseOut="this.src='/images/backprev.png'">
@@ -615,55 +696,71 @@ function check_dongle_status(){
 					</table>
 				</div>
 				<div style="margin:5px;"><img src="/images/New_ui/export/line_export.png"></div>
-	      <div class="formfontdesc"><#HSDPAConfig_hsdpa_enable_hint1#></div>			  
-
-						<table  width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="WANscap">
-							<thead>
+	      		<div class="formfontdesc"><#HSDPAConfig_hsdpa_enable_hint1#></div>
+					<table  width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable" id="WANscap">
+						<thead>
 							<tr>
 								<td colspan="2"><#wan_index#></td>
 							</tr>
-							</thead>							
-							<tr>
-								<th><#wan_type#></th>
-								<td align="left">
-									<select class="input_option" name="wan_unit" onchange="change_wan_unit(this);">
-									</select>
-									<!--select id="dsltmp_transmode" name="dsltmp_transmode" class="input_option" style="margin-left:7px;" onChange="change_dsl_transmode(this);">
-											<option value="atm" <% nvram_match("dsltmp_transmode", "atm", "selected"); %>>ADSL WAN (ATM)</option>
-											<option value="ptm" <% nvram_match("dsltmp_transmode", "ptm", "selected"); %>>VDSL WAN (PTM)</option>
-									</select-->
-								</td>
-							</tr>
-						</table>
+						</thead>
+						<tr>
+							<th><#wan_type#></th>
+							<td align="left">
+								<select class="input_option" name="wan_unit" onchange="change_wan_unit(this);"></select>
+								<!--select id="dsltmp_transmode" name="dsltmp_transmode" class="input_option" style="margin-left:7px;" onChange="change_dsl_transmode(this);">
+									<option value="atm" <% nvram_match("dsltmp_transmode", "atm", "selected"); %>>ADSL WAN (ATM)</option>
+									<option value="ptm" <% nvram_match("dsltmp_transmode", "ptm", "selected"); %>>VDSL WAN (PTM)</option>
+								</select-->
+							</td>
+						</tr>
+					</table>
 
-			  <table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px">
+			  		<table width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px">
 					<thead>
 					<tr>
 						<td colspan="2"><#t2BC#></td>
 					</tr>
-					</thead>							
+					</thead>
 
 					<tr>
-						<th><#HSDPAConfig_hsdpa_enable_itemname#></th>
+						<th><#enable_usb_mode#></th>
 						<td>
-							<input type="radio" value="1" onclick="switch_modem_mode(document.form.modem_enable_option.value);reloadProfile();" name="modem_enable_radio" checked><#checkbox_Yes#>
-							<input type="radio" value="0" onclick="switch_modem_mode(0);reloadProfile();" name="modem_enable_radio" <% nvram_match("modem_enable", "0", "checked"); %>><#checkbox_No#>
+							<div class="left" style="width:94px; float:left; cursor:pointer;" id="usb_modem_switch"></div>
+							<div class="clear" style="height:32px; width:74px; position: relative; overflow: hidden"></div>
+						</td>
+					</tr>
+
+					<tr id="modem_android_tr" style="display:none;">
+						<th><#select_usb_device#></th>
+						<td align="left">
+							<select id="modem_android" name="modem_android" class="input_option" onChange="select_usb_device(this);">
+								<option value="0" <% nvram_match("modem_android", "0", "selected"); %>><#menu5_4_4#></option>
+								<option value="1" <% nvram_match("modem_android", "1", "selected"); %>><#Android_phone#></option>
+							</select>
+							<div  class="formfontdesc" id="android_desc" style="display:none; color:#FFCC00;margin-top:5px;">
+								<#usb_tethering_hint0#>
+								<ol style="margin-top: 0px;">
+								<li><#usb_tethering_hint1#></li>
+								<li><#usb_tethering_hint2#></li>
+								<li><#usb_tethering_hint3#></li>
+								</ol>
+							</div>
 						</td>
 					</tr>
 
 					<tr>
-          	<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,9);"><#HSDPAConfig_Country_itemname#></a></th>
-            <td>
-            	<select name="modem_country" class="input_option" onchange="switch_modem_mode(document.form.modem_enable_option.value);reloadProfile();"></select>
+          				<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,9);"><#HSDPAConfig_Country_itemname#></a></th>
+            			<td>
+            				<select name="modem_country" class="input_option" onchange="switch_modem_mode(document.form.modem_enable_option.value);reloadProfile();"></select>
 						</td>
 					</tr>
                                 
-          <tr>
-          	<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,8);"><#HSDPAConfig_ISP_itemname#></a></th>
-            <td>
-            	<select name="modem_isp" class="input_option" onchange="show_APN_list();"></select>
-            </td>
-          </tr>
+			        <tr>
+			         	<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,8);"><#HSDPAConfig_ISP_itemname#></a></th>
+			            <td>
+			            	<select name="modem_isp" class="input_option" onchange="show_APN_list();"></select>
+			            </td>
+			        </tr>
 
 					<tr>
 						<th width="40%">
@@ -680,26 +777,12 @@ function check_dongle_status(){
 							<br/><span id="hsdpa_hint" style="display:none;"><#HSDPAConfig_hsdpa_enable_hint2#></span>
 						</td>
 					</tr>
-					<!--tr>
-						<th width="40%">
-							<a class="hintstyle" href="javascript:void(0);"><#Network_type#></a>
-						</th>
-						<td>
-							<select name="modem_mode" id=modem_mode" class="input_option">
-								<option value="0" <% nvram_match("modem_mode", "0", "selected"); %>>Auto</option>
-								<option value="43" <% nvram_match("modem_mode", "43", "selected"); %>>4G/3G</option>
-								<option value="4" <% nvram_match("modem_mode", "4", "selected"); %>>4G only</option>
-								<option value="3" <% nvram_match("modem_mode", "3", "selected"); %>>3G only</option>
-								<option value="2" <% nvram_match("modem_mode", "2", "selected"); %>>2G only</option>
-							</select>
-						</td>
-					</tr-->
 
-          <tr>
+          			<tr>
 						<th><a class="hintstyle"  href="javascript:void(0);" onClick="openHint(21,3);"><#HSDPAConfig_private_apn_itemname#></a></th>
-            <td>
-            	<input id="modem_apn" name="modem_apn" class="input_20_table" maxlength="32" type="text" value="" autocorrect="off" autocapitalize="off"/>
-           		<img id="pull_arrow" height="14px;" src="/images/arrow-down.gif" style="position:absolute;*margin-left:-3px;*margin-top:1px;" onclick="pullLANIPList(this);" title="<#select_APN_service#>" onmouseover="over_var=1;" onmouseout="over_var=0;">
+            			<td>
+            				<input id="modem_apn" name="modem_apn" class="input_20_table" maxlength="32" type="text" value="" autocorrect="off" autocapitalize="off"/>
+           					<img id="pull_arrow" height="14px;" src="/images/arrow-down.gif" style="position:absolute;*margin-left:-3px;*margin-top:1px;" onclick="pullLANIPList(this);" title="<#select_APN_service#>" onmouseover="over_var=1;" onmouseout="over_var=0;">
 							<div id="ClientList_Block_PC" class="ClientList_Block_PC"></div>
 						</td>
 					</tr>
@@ -763,8 +846,7 @@ function check_dongle_status(){
   <td width="10" align="center" valign="top">&nbsp;</td>
 	</tr>
 </table>
-</form>					
-
+</form>
 <div id="footer"></div>
 </body>
 </html>

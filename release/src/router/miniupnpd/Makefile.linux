@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.90 2015/04/26 14:43:28 nanard Exp $
+# $Id: Makefile.linux,v 1.86 2014/04/09 07:22:28 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2015 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -27,7 +27,8 @@ CFLAGS += -fno-strict-aliasing
 CFLAGS += -fno-common
 CPPFLAGS += -D_GNU_SOURCE
 CFLAGS += -Wall
-CFLAGS += -Wextra -Wstrict-prototypes -Wdeclaration-after-statement
+CFLAGS += $(EXTRACFLAGS)
+#CFLAGS += -Wextra -Wstrict-prototypes -Wdeclaration-after-statement
 #CFLAGS += -Wno-missing-field-initializers
 #CFLAGS += -ansi	# iptables headers does use typeof which is a gcc extension
 CC ?= gcc
@@ -75,7 +76,8 @@ LDFLAGS += $(shell $(PKG_CONFIG) --libs-only-L libiptc)
 LDFLAGS += $(shell $(PKG_CONFIG) --libs-only-other libiptc)
 else
 
-ifeq "$(wildcard /etc/gentoo-release )" ""
+#TARGET_GENTOO := $(wildcard /etc/gentoo-release )
+ifeq ($(TARGET_GENTOO),)
 LDLIBS ?= -liptc
 else # gentoo
 # the following is better, at least on gentoo with iptables 1.4.6

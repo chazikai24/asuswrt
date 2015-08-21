@@ -547,7 +547,7 @@ function applyRule(){
 		return;
 	}
 
-	showLoading(); 
+	showLoading();
 	document.form.submit();
 }
 
@@ -1478,6 +1478,7 @@ function show_phone(show){
 		document.getElementById("sms_phone_tr").style.display = "none";
 }
 
+/*
 var curState = '<% nvram_get("usb_modem_act_simdetect"); %>';
 function set_simdetect(enable_flag){
 	var confirm_str = "Change SIM Card etector setting will reboot the router. Are you sure you want to change it?";
@@ -1499,7 +1500,7 @@ function set_simdetect(enable_flag){
 	}
 	
 }
-
+*/
 </script>
 </head>
 
@@ -1531,7 +1532,7 @@ function set_simdetect(enable_flag){
 <input type="hidden" name="next_page" value="Advanced_MobileBroadband_Content.asp">
 <input type="hidden" name="modified" value="0">
 <input type="hidden" name="action_mode" value="apply">
-<input type="hidden" name="action_script" value="restart_net">
+<input type="hidden" name="action_script" value="restart_wan_if">
 <input type="hidden" name="action_wait" value="10">
 <input type="hidden" name="preferred_lang" id="preferred_lang" value="<% nvram_get("preferred_lang"); %>">
 <input type="hidden" name="firmver" value="<% nvram_get("firmver"); %>">
@@ -1661,21 +1662,20 @@ function set_simdetect(enable_flag){
 									<option value="0" <% nvram_match("wan_enable", "0","selected"); %>><#WLANConfig11b_WirelessCtrl_buttonname#></option>
 								</select>
 							</td>
-						</tr>								
+						</tr>
 					</table>
 
-					<div id="basic_setting_desc" class="formfontdesc" style="margin-bottom:0px; margin-top: 15px;"><#Mobile_desc1#></div>					
-					<table id="simdetect_table" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px">
+					<div id="basic_setting_desc" class="formfontdesc" style="margin-bottom:0px; margin-top: 15px;"><#Mobile_desc1#></div>
+					<!--table id="simdetect_table" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px">
 						<thead>
 						<tr>
 							<td colspan="2"><#Mobile_SIM_Detector#></td>
 						</tr>
-						</thead>					
+						</thead>
 						<tr>
 							<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(28, 5);"><#Mobile_SIM_Detector#></a></th>
 							<td>
 					    		<div class="left" style="width:94px; float:left;" id="simdetect_switch"></div>
-									<!--div class="clear"></div-->
 									<div class="iphone_switch_container" style="height:32px; width:74px; position: relative; overflow: hidden"></div>
 									<script type="text/javascript">
 										$('#simdetect_switch').iphoneSwitch('<% nvram_get("usb_modem_act_simdetect"); %>', 
@@ -1692,8 +1692,8 @@ function set_simdetect(enable_flag){
 										);
 									</script>
 							</td>
-						</tr>				
-					</table>
+						</tr>
+					</table-->
 				<table id="connection_table" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3"  class="FormTable" style="margin-top:8px">
 				  	<thead>
 				  	<tr>

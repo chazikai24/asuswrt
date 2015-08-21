@@ -206,6 +206,7 @@ var cooler_support = isSupport("fanctrl");
 var power_support = isSupport("pwrctrl"); 
 var repeater_support = isSupport("repeater"); 
 var psta_support = isSupport("psta");
+var wisp_support = isSupport("wisp");
 var wl6_support = isSupport("wl6");
 var Rawifi_support = isSupport("rawifi");
 var Qcawifi_support = isSupport("qcawifi");
@@ -231,6 +232,8 @@ var appnet_support = isSupport("appnet");
 var media_support = isSupport(" media");
 var noiTunes_support = isSupport("noitunes");
 var nomedia_support = isSupport("nomedia");
+var noftp_support = isSupport("noftp");
+var noaidisk_support = isSupport("noaidisk");
 var cloudsync_support = isSupport("cloudsync");
 var aicloudipk_support = isSupport("aicloudipk");
 var yadns_hideqis = isSupport("yadns_hideqis");
@@ -254,6 +257,8 @@ var hwmodeSwitch_support = isSupport("swmode_switch");
 var diskUtility_support = isSupport("diskutility");
 var networkTool_support = isSupport("nwtool");
 var band5g_11ac_support = isSupport("11AC");
+if("<% nvram_get("preferred_lang"); %>" == "UK" || based_modelid == "RT-N600")		//remove 80MHz(11ac) for UK , remove 80MHz(11ac) for MODELDEP: RT-N600
+	band5g_11ac_support = false;
 var optimizeXbox_support = isSupport("optimize_xbox");
 var spectrum_support = isSupport("spectrum");
 var mediareview_support = isSupport("wlopmode");
@@ -267,6 +272,7 @@ var tmo_support = isSupport("tmo");
 var wl_mfp_support = isSupport("wl_mfp");	// For Protected Management Frames, ARM platform
 var bwdpi_support = isSupport("bwdpi");
 var adBlock_support = isSupport("adBlock");
+var keyGuard_support = isSupport("keyGuard");
 var rog_support = isSupport("rog");
 var smart_connect_support = isSupport("smart_connect");
 var rrsut_support = isSupport("rrsut");
@@ -278,6 +284,7 @@ var ntfs_sparse_support = isSupport("sparse");
 var tr069_support = isSupport("tr069");
 var tor_support = isSupport("tor");
 var stainfo_support = isSupport("stainfo");
+var dhcp_override_support = isSupport("dhcp_override");
 var QISWIZARD = "QIS_wizard.htm";
 
 // Todo: Support repeater mode
@@ -674,7 +681,7 @@ tabtitle[2] = new Array("", "<#menu5_2_1#>", "<#menu5_2_2#>", "<#menu5_2_3#>", "
 tabtitle[3] = new Array("", "<#menu5_3_1#>", "<#dualwan#>", "<#menu5_3_3#>", "<#menu5_3_4#>", "<#menu5_3_5#>", "<#menu5_3_6#>", "<#NAT_passthrough_itemname#>", "<#menu5_4_4#>");
 tabtitle[4] = new Array("", "<#UPnPMediaServer#>", "<#menu5_4_1#>", "<#menu5_4_2#>");
 tabtitle[5] = new Array("", "IPv6");
-tabtitle[6] = new Array("", "<#BOP_isp_heart_item#>", "VPN Client", "TOR");	//, "VPN Client Advanced"
+tabtitle[6] = new Array("", "<#BOP_isp_heart_item#>", "<#vpnc_title#>", "TOR");
 tabtitle[7] = new Array("", "<#menu5_1_1#>", "<#menu5_5_2#>", "<#menu5_5_5#>", "<#menu5_5_3#>", "<#menu5_5_4#>", "<#menu5_5_6#>");
 tabtitle[8] = new Array("", "<#menu5_6_1#>", "<#menu5_6_2#>", "<#menu5_6_3#>", "<#menu5_6_4#>", "Performance tuning", "<#menu_dsl_setting#>", "<#menu_feedback#>", "SNMP", "TR-069");
 tabtitle[9] = new Array("", "<#menu5_7_2#>", "<#menu5_7_4#>", "<#menu5_7_3#>", "IPv6", "<#menu5_7_6#>", "<#menu5_7_5#>", "<#menu_dsl_log#>", "<#Connections#>");
@@ -682,7 +689,7 @@ tabtitle[10] = new Array("", "<#Network_Analysis#>", "Netstat", "<#NetworkTools_
 if(bwdpi_support){
 	if(based_modelid == "RT-AC3200"){
 		tabtitle[11] = new Array("", "<#Bandwidth_monitor#>", "QoS", "<#Adaptive_History#>", "<table style='margin-top:-10px \\9;'><tr><td><img src='/images/ROG_Logo.png' style='border:0px;width:32px;'></td><td>ROG First</td></tr></table>");
-		tabtitle[12] = new Array("", "<#AiProtection_Home#>", "<#Parental_Control#>", "Ad Blocking");
+		tabtitle[12] = new Array("", "<#AiProtection_Home#>", "<#Parental_Control#>", "Ad Blocking", "Key Guard");
 		tabtitle[13] = new Array("", "Time Limits", "<#AiProtection_filter#>");
 		tabtitle[14] = new Array("", "Statistic", "Traffic Monitor");
 	}
@@ -691,7 +698,7 @@ if(bwdpi_support){
 			tabtitle[11] = new Array("", "<#Bandwidth_monitor#>", "QoS", "<#Adaptive_History#>", "<table style='margin-top:-10px \\9;'><tr><td><img src='/images/ROG_Logo.png' style='border:0px;width:32px;'></td><td>ROG First</td></tr></table>", "<#traffic_monitor#>", "Spectrum");
 		else
 			tabtitle[11] = new Array("", "<#Bandwidth_monitor#>", "QoS", "<#Adaptive_History#>", "<table style='margin-top:-10px \\9;'><tr><td><img src='/images/ROG_Logo.png' style='border:0px;width:32px;'></td><td>ROG First</td></tr></table>", "<#traffic_monitor#>");
-		tabtitle[12] = new Array("", "<#AiProtection_Home#>", "<#Parental_Control#>", "Ad Blocking");
+		tabtitle[12] = new Array("", "<#AiProtection_Home#>", "<#Parental_Control#>", "Ad Blocking", "Key Guard");
 		tabtitle[13] = new Array("", "Time Limits", "<#AiProtection_filter#>");
 	}
 }
@@ -715,18 +722,18 @@ tablink[9] = new Array("", "Main_LogStatus_Content.asp", "Main_WStatus_Content.a
 tablink[10] = new Array("", "Main_Analysis_Content.asp", "Main_Netstat_Content.asp", "Main_WOL_Content.asp", "SMTP_Client.asp", "Advanced_Smart_Connect.asp");
 if(bwdpi_support){
 	if(based_modelid == "RT-AC3200"){
-		tablink[11] = new Array("", "AdaptiveQoS_Bandwidth_Monitor.asp", "QoS_EZQoS.asp", "AdaptiveQoS_WebHistory.asp", "AdaptiveQoS_ROG.asp", "Main_Spectrum_Content.asp", "Advanced_QOSUserPrio_Content.asp", "Advanced_QOSUserRules_Content.asp", "AdaptiveQoS_Adaptive.asp");
-		tablink[12] = new Array("", "AiProtection_HomeProtection.asp", "AiProtection_WebProtector.asp", "AiProtection_AdBlock.asp");
+		tablink[11] = new Array("", "AdaptiveQoS_Bandwidth_Monitor.asp", "QoS_EZQoS.asp", "AdaptiveQoS_WebHistory.asp", "AdaptiveQoS_ROG.asp", "Main_Spectrum_Content.asp", "Advanced_QOSUserPrio_Content.asp", "Advanced_QOSUserRules_Content.asp", "AdaptiveQoS_Adaptive.asp", "Bandwidth_Limiter.asp");
+		tablink[12] = new Array("", "AiProtection_HomeProtection.asp", "AiProtection_WebProtector.asp", "AiProtection_AdBlock.asp", "AiProtection_Key_Guard.asp");
 		tablink[13] = new Array("");
 		tablink[14] = new Array("", "TrafficAnalyzer_Statistic.asp", "Main_TrafficMonitor_realtime.asp", "Main_TrafficMonitor_last24.asp",  "Main_TrafficMonitor_daily.asp");
 	}
 	else{
-		tablink[11] = new Array("", "AdaptiveQoS_Bandwidth_Monitor.asp", "QoS_EZQoS.asp", "AdaptiveQoS_WebHistory.asp", "AdaptiveQoS_ROG.asp", "Main_TrafficMonitor_realtime.asp", "Main_Spectrum_Content.asp", "Main_TrafficMonitor_last24.asp",  "Main_TrafficMonitor_daily.asp", "Advanced_QOSUserPrio_Content.asp", "Advanced_QOSUserRules_Content.asp", "AdaptiveQoS_Adaptive.asp");
-		tablink[12] = new Array("", "AiProtection_HomeProtection.asp", "AiProtection_WebProtector.asp", "AiProtection_AdBlock.asp");
+		tablink[11] = new Array("", "AdaptiveQoS_Bandwidth_Monitor.asp", "QoS_EZQoS.asp", "AdaptiveQoS_WebHistory.asp", "AdaptiveQoS_ROG.asp", "Main_TrafficMonitor_realtime.asp", "Main_Spectrum_Content.asp", "Main_TrafficMonitor_last24.asp",  "Main_TrafficMonitor_daily.asp", "Advanced_QOSUserPrio_Content.asp", "Advanced_QOSUserRules_Content.asp", "AdaptiveQoS_Adaptive.asp", "Bandwidth_Limiter.asp");
+		tablink[12] = new Array("", "AiProtection_HomeProtection.asp", "AiProtection_WebProtector.asp", "AiProtection_AdBlock.asp", "AiProtection_Key_Guard.asp");
 	}
 }
 else{
-	tablink[11] = new Array("", "QoS_EZQoS.asp", "Main_TrafficMonitor_realtime.asp", "AdaptiveQoS_ROG.asp", "Main_Spectrum_Content.asp", "Main_TrafficMonitor_last24.asp", "Main_TrafficMonitor_daily.asp", "Advanced_QOSUserPrio_Content.asp", "Advanced_QOSUserRules_Content.asp");
+	tablink[11] = new Array("", "QoS_EZQoS.asp", "Main_TrafficMonitor_realtime.asp", "AdaptiveQoS_ROG.asp", "Main_Spectrum_Content.asp", "Main_TrafficMonitor_last24.asp", "Main_TrafficMonitor_daily.asp", "Advanced_QOSUserPrio_Content.asp", "Advanced_QOSUserRules_Content.asp", "Bandwidth_Limiter.asp");
 	tablink[12] = new Array("", "ParentalControl.asp", "YandexDNS.asp");
 }
 // Level 2 Menu
@@ -736,11 +743,11 @@ menuL2_link  = new Array("", tablink[0][1], tablink[1][1], tablink[2][1], tablin
 // Level 1 Menu
 if(bwdpi_support){
 	if(based_modelid == "RT-AC3200"){
-		menuL1_title = new Array("", "<#menu1#>", "<#Guest_Network#>", "AiProtection", "<#Adaptive_QoS#>", "Traffic Analyzer" ,"<#Menu_usb_application#>", "AiCloud 2.0", "<#menu5#>");
+		menuL1_title = new Array("", "<#menu1#>", "<#Guest_Network#>", "<#AiProtection_title#>", "<#Adaptive_QoS#>", "Traffic Analyzer" ,"<#Menu_usb_application#>", "AiCloud 2.0", "<#menu5#>");
 		menuL1_link = new Array("", "index.asp", "Guest_network.asp", "AiProtection_HomeSecurity.asp", "AdaptiveQoS_Bandwidth_Monitor.asp", "TrafficAnalyzer_Statistic.asp", "APP_Installation.asp", "cloud_main.asp", "");
 	}
 	else{
-		menuL1_title = new Array("", "<#menu1#>", "<#Guest_Network#>", "AiProtection", "<#Adaptive_QoS#>",  "<#Menu_usb_application#>", "AiCloud 2.0", "<#menu5#>");
+		menuL1_title = new Array("", "<#menu1#>", "<#Guest_Network#>", "<#AiProtection_title#>", "<#Adaptive_QoS#>",  "<#Menu_usb_application#>", "AiCloud 2.0", "<#menu5#>");
 		menuL1_link = new Array("", "index.asp", "Guest_network.asp", "AiProtection_HomeSecurity.asp", "AdaptiveQoS_Bandwidth_Monitor.asp",  "APP_Installation.asp", "cloud_main.asp", "");
 	}
 }
@@ -836,12 +843,12 @@ function remove_url(){
 		if(based_modelid == "RT-AC3200"){
 			menuL1_title[5] ="";		//Traffic Analyzer
 			menuL1_link[5] ="";
-			menuL1_title[7] ="";		//AiCloud 2.0
-			menuL1_link[7] ="";
+			//menuL1_title[7] ="";		//AiCloud 2.0
+			//menuL1_link[7] ="";
 		}
 		else{
-			menuL1_title[6] ="";
-			menuL1_link[6] ="";
+			//menuL1_title[6] ="";
+			//menuL1_link[6] ="";
 		}			
 		// Wireless
 		if(sw_mode == 4){
@@ -899,19 +906,20 @@ function remove_url(){
 		if(based_modelid == "RT-AC3200"){
 			menuL1_title[5] ="";		//Traffic Analyzer
 			menuL1_link[5] ="";
-			menuL1_title[7] ="";		//AiCloud 2.0
-			menuL1_link[7] ="";
+			//menuL1_title[7] ="";		//AiCloud 2.0
+			//menuL1_link[7] ="";
 		}
 		else{
-			menuL1_title[6] ="";
-			menuL1_link[6] ="";
+			//menuL1_title[6] ="";
+			//menuL1_link[6] ="";
 		}
 
 		// WAN
 		menuL2_title[4]="";
 		menuL2_link[4]="";
 		// LAN
-		remove_menu_item("Advanced_DHCP_Content.asp");
+		if(!dhcp_override_support)
+			remove_menu_item("Advanced_DHCP_Content.asp");
 		remove_menu_item("Advanced_GWStaticRoute_Content.asp");
 		remove_menu_item("Advanced_IPTV_Content.asp");
 		remove_menu_item("Advanced_SwitchCtrl_Content.asp");
@@ -961,7 +969,7 @@ function remove_url(){
 		}
 	}
 
-	if(!media_support){
+	if(!media_support || nomedia_support){
 		remove_menu_item("mediaserver.asp");
 	}
 
@@ -1008,6 +1016,10 @@ function remove_url(){
 		menuL1_link[5] = "";
 	}
 
+	if(noftp_support){
+		remove_menu_item("Advanced_AiDisk_ftp.asp");
+	}
+
 	if(!pptpd_support && !openvpnd_support){
 		if(!vpnc_support){
 			menuL2_title[7] = "";
@@ -1048,6 +1060,9 @@ function remove_url(){
 	
 	if(!adBlock_support){
 		remove_menu_item("AiProtection_AdBlock.asp");
+	}
+	if(!keyGuard_support){
+		remove_menu_item("AiProtection_Key_Guard.asp");
 	}
 
 	if(!tor_support){
@@ -1142,7 +1157,7 @@ function show_menu(){
 
 	// special case for Traffic Manager
 	if(L1 == traffic_L1_dx || L2 == traffic_L2_dx){
-		if(current_url.indexOf("QoS_EZQoS") == 0 || current_url.indexOf("Advanced_QOSUserRules_Content") == 0 || current_url.indexOf("Advanced_QOSUserPrio_Content") == 0){
+		if(current_url.indexOf("QoS_EZQoS") == 0 || current_url.indexOf("Advanced_QOSUserRules_Content") == 0 || current_url.indexOf("Advanced_QOSUserPrio_Content") == 0 || current_url.indexOf("Bandwidth_Limiter") == 0){
 			L1 = traffic_L1_dx; 
 			L2 = traffic_L2_dx; 
 			if(bwdpi_support){
@@ -1402,11 +1417,16 @@ function show_menu(){
 		setTimeout('cal_height();', 1);
 
 	if(notice_acpw_is_default == 1){	//case1
-		notification.array[0] = 'noti_acpw';
-		notification.acpw = 1;
-		notification.desc[0] = '<#ASUSGATE_note1#>';
-		notification.action_desc[0] = '<#ASUSGATE_act_change#>';
-		notification.clickCallBack[0] = "location.href = 'Advanced_System_Content.asp?af=http_passwd2';"
+		if(default_psk_support){
+			location.href = 'Main_Password.asp?nextPage=' + window.location.pathname.substring(1 ,window.location.pathname.length);
+		}
+		else{
+			notification.array[0] = 'noti_acpw';
+			notification.acpw = 1;
+			notification.desc[0] = '<#ASUSGATE_note1#>';
+			notification.action_desc[0] = '<#ASUSGATE_act_change#>';
+			notification.clickCallBack[0] = "location.href = 'Advanced_System_Content.asp?af=http_passwd2';"
+		}
 	}else
 		notification.acpw = 0;
 
@@ -1437,13 +1457,13 @@ function show_menu(){
 	}else
 		notification.wifi_5g = 0;
 	
-	if(usb_support && enable_ftp == 1 && st_ftp_mode == 1 && st_ftp_force_mode == '' ){ //case4_1
+	if(usb_support && !noftp_support && enable_ftp == 1 && st_ftp_mode == 1 && st_ftp_force_mode == '' ){ //case4_1
 			notification.array[4] = 'noti_ftp';
 			notification.ftp = 1;
 			notification.desc[4] = '<#ASUSGATE_note4_1#>';
 			notification.action_desc[4] = '<#web_redirect_suggestion_etc#>';
 			notification.clickCallBack[4] = "showLoading();setTimeout('document.noti_ftp.submit();', 1);setTimeout('notification.redirectftp()', 2000);";
-	}else if(usb_support && enable_ftp == 1 && st_ftp_mode != 2){	//case4
+	}else if(usb_support && !noftp_support && enable_ftp == 1 && st_ftp_mode != 2){	//case4
 			notification.array[4] = 'noti_ftp';
 			notification.ftp = 1;
 			notification.desc[4] = '<#ASUSGATE_note4#>';
@@ -1891,29 +1911,29 @@ function show_footer(){
 
 	// FAQ searching bar{
 	footer_code += '<div style="margin-top:-75px;margin-left:205px;"><table width="765px" border="0" align="center" cellpadding="0" cellspacing="0"><tr>';
-	footer_code += '<td width="20" align="right"><div id="bottom_help_icon" style="margin-right:3px;"></div></td><td width="100" id="bottom_help_title" align="left"><#Help#> & <#Support#></td>';
+	footer_code += '<td width="20" align="right"><div id="bottom_help_icon" style="margin-right:3px;"></div></td><td width="115" id="bottom_help_title" align="left"><#Help#> & <#Support#></td>';
 	
 	var model_name_supportsite = based_modelid.replace("-", "");
 	model_name_supportsite = model_name_supportsite.replace("+", "Plus");
 
 	if(based_modelid =="RT-N12" || hw_ver.search("RTN12") != -1){	//MODELDEP : RT-N12
 		if( hw_ver.search("RTN12HP") != -1){	//RT-N12HP
-			footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12HP/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12HP/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
+			footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12HP/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12HP/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
 		}else if(hw_ver.search("RTN12B1") != -1){ //RT-N12B1
-			footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_B1/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_B1/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
+			footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_B1/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_B1/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
 		}else if(hw_ver.search("RTN12C1") != -1){ //RT-N12C1
-			footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_C1/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_C1/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
+			footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_C1/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_C1/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
 		}else if(hw_ver.search("RTN12D1") != -1){ //RT-N12D1
-			footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_D1/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_D1/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
+			footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_D1/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/RTN12_D1/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
 		}else{	//RT-N12
-			footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/"+ model_name_supportsite +"/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/" + model_name_supportsite + "/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";	
+			footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/"+ model_name_supportsite +"/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/" + model_name_supportsite + "/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";	
 		}
 	}
 	else if(based_modelid == "DSL-N55U"){	//MODELDEP : DSL-N55U
-		footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_A/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_A/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
+		footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_A/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_A/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
 	}
 	else if(based_modelid == "DSL-N55U-B"){	//MODELDEP : DSL-N55U-B								
-		footer_codk_Download += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_B/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_B/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
+		footer_codk_Download += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_B/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com/Networking/DSLN55U_Annex_B/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";
 	}
 	else{
 		if(based_modelid == "DSL-AC68U" || based_modelid == "DSL-AC68R" || based_modelid == "RT-N11P")
@@ -1927,16 +1947,19 @@ function show_footer(){
 			model_name_supportsite = "RTN12E_B1";
 
 		if(tmo_support){
-			footer_code += '<td width="300" id="bottom_help_link" align="left">&nbsp';
+			footer_code += '<td width="310" id="bottom_help_link" align="left">&nbsp';
 			footer_code += '&nbsp|&nbsp<a style="font-weight:bolder;text-decoration:underline;cursor:pointer;" onClick="show_contactus();">Contact ASUS</a><div id="contactus_block" style="position:absolute;z-index:999;width:280px;height:155px;margin-top:-200px;*margin-top:-180px;margin-left:0px;*margin-left:-100px;background-color:#2B373B;box-shadow: 3px 10px 10px #000;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius:5px;display:none;"></div>';
 		}
 		else
-			footer_code += "<td width=\"300\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/"+ model_name_supportsite +"/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/" + model_name_supportsite + "/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";	
+			footer_code += "<td width=\"310\" id=\"bottom_help_link\" align=\"left\">&nbsp&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/"+ model_name_supportsite +"/HelpDesk_Manual/\" target=\"_blank\"><#Manual#></a>&nbsp|&nbsp<a style=\"font-weight: bolder;text-decoration:underline;cursor:pointer;\" href=\"http://www.asus.com"+ href_lang +"Networking/" + model_name_supportsite + "/HelpDesk_Download/\" target=\"_blank\"><#Utility#></a>";	
 	}
 
-
-	if(feedback_support){
-		footer_code += '&nbsp|&nbsp<a href="/Advanced_Feedback.asp" style="font-weight: bolder;text-decoration:underline;cursor:pointer;" target="_self">Feedback</a>';
+	if(dsl_support && feedback_support){
+		footer_code += '&nbsp|&nbsp<a id="fb_link" href="/Advanced_Feedback.asp" target="_self" style="font-weight: bolder;text-decoration:underline;cursor:pointer;"><#menu_feedback#></a>';
+	}
+	else if(feedback_support){
+		var location_href = '/Advanced_Feedback.asp?origPage=' + window.location.pathname.substring(1 ,window.location.pathname.length);
+		footer_code += '&nbsp|&nbsp<a id="fb_link" href="'+location_href+'" target="_blank" style="font-weight: bolder;text-decoration:underline;cursor:pointer;"><#menu_feedback#></a>';
 	}
 	footer_code += '</td>';
 	footer_code += '<td width="290" id="bottom_help_FAQ" align="right" style="font-family:Arial, Helvetica, sans-serif;">FAQ&nbsp&nbsp<input type="text" id="FAQ_input" class="input_FAQ_table" maxlength="40" onKeyPress="submitenter(this,event);" autocorrect="off" autocapitalize="off"></td>';
@@ -2806,6 +2829,7 @@ function inputCtrl(obj, flag){
 	|| current_url.indexOf("Advanced_SwitchCtrl_Content.asp") == 0
 	|| current_url.indexOf("router.asp") == 0
 	|| current_url.indexOf("Advanced_MobileBroadband_Content") == 0
+	|| current_url.indexOf("Advanced_Feedback") == 0
 	){
 		if(obj.type == "checkbox")
 			return true;
@@ -2856,6 +2880,16 @@ var vpnc_sbstate_t = '';
 var vpn_clientX_errno = '';
 var vpnc_proto = '<% nvram_get("vpnc_proto");%>';
 var vpnd_state;	
+var vpnc_state_t1 = '';
+var vpnc_state_t2 = '';
+var vpnc_state_t3 = '';
+var vpnc_state_t4 = '';
+var vpnc_state_t5 = '';
+var vpnc_errno_t1 = '';
+var vpnc_errno_t2 = '';
+var vpnc_errno_t3 = '';
+var vpnc_errno_t4 = '';
+var vpnc_errno_t5 = '';
 var qtn_state_t = '';
 
 //for mobile broadband
@@ -2953,21 +2987,22 @@ function refreshStatus(xmldoc){
 	tx_bytes = parseFloat(simState[11].firstChild.nodeValue.replace("tx_bytes=", ""));
 	modem_sim_order = parseFloat(simState[12].firstChild.nodeValue.replace("modem_sim_order=", ""));	
 
-	if(vpnc_proto == "openvpn"){
-		if('<% nvram_get("vpn_client_unit"); %>' == 1){
-			vpnc_state_t = vpnStatus[3].firstChild.nodeValue.replace("vpn_client1_state=", "");
-			vpn_clientX_errno = vpnStatus[6].firstChild.nodeValue.replace("vpn_client1_errno=", "");
-			
-		}else{	//unit 2
-			vpnc_state_t = vpnStatus[4].firstChild.nodeValue.replace("vpn_client2_state=", "");
-			vpn_clientX_errno = vpnStatus[7].firstChild.nodeValue.replace("vpn_client2_errno=", "");
-		}
+	if(vpnc_support){
+		vpnc_state_t1 = vpnStatus[3].firstChild.nodeValue.replace("vpn_client1_state=", "");
+		vpnc_errno_t1 = vpnStatus[9].firstChild.nodeValue.replace("vpn_client1_errno=", "");
+		vpnc_state_t2 = vpnStatus[4].firstChild.nodeValue.replace("vpn_client2_state=", "");
+		vpnc_errno_t2 = vpnStatus[10].firstChild.nodeValue.replace("vpn_client2_errno=", "");
+		vpnc_state_t3 = vpnStatus[5].firstChild.nodeValue.replace("vpn_client3_state=", "");
+		vpnc_errno_t3 = vpnStatus[11].firstChild.nodeValue.replace("vpn_client3_errno=", "");
+		vpnc_state_t4 = vpnStatus[6].firstChild.nodeValue.replace("vpn_client4_state=", "");
+		vpnc_errno_t4 = vpnStatus[12].firstChild.nodeValue.replace("vpn_client4_errno=", "");
+		vpnc_state_t5 = vpnStatus[7].firstChild.nodeValue.replace("vpn_client5_state=", "");
+		vpnc_errno_t5 = vpnStatus[13].firstChild.nodeValue.replace("vpn_client5_errno=", "");
+		vpnc_state_t = vpnStatus[1].firstChild.nodeValue.replace("vpnc_state_t=", "");//vpnc (pptp/l2tp)
 	}
-	else	//vpnc (pptp/l2tp)
-		vpnc_state_t = vpnStatus[1].firstChild.nodeValue.replace("vpnc_state_t=", "");
-
+	
 	vpnc_sbstate_t = vpnStatus[2].firstChild.nodeValue.replace("vpnc_sbstate_t=", "");
-	vpnd_state = vpnStatus[5].firstChild.nodeValue;
+	vpnd_state = vpnStatus[8].firstChild.nodeValue;
 
 	if(location.pathname == "/"+ QISWIZARD)
 		return false;	
@@ -3703,7 +3738,7 @@ function decodeURIComponentSafe(_ascii){
 var isNewFW = function(FWVer){
 	var Latest_firmver = FWVer.split("_");
 
-	if (odmpid == "TM-AC1900" && (bl_version == "2.1.2.2" || bl_version == "2.1.2.5"))
+	if (odmpid == "TM-AC1900" && (bl_version == "2.1.2.2" || bl_version == "2.1.2.6"))
 		return true;
 
 	if(typeof Latest_firmver[0] !== "undefined" && typeof Latest_firmver[1] !== "undefined" && typeof Latest_firmver[2] !== "undefined"){

@@ -204,7 +204,9 @@ clean:
 	find . \( -name '*.[od]' -o -name '*.tmp' \) -type f -print | xargs rm -f
 	find -name obj | xargs rm -rf
 	rm -rf lib
+ifeq ($(REBUILD),1)
 	find -name wps_monitor | xargs rm -f
+endif
 
 # install
 install: all

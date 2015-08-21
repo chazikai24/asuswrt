@@ -1,4 +1,4 @@
-/* $Id: upnpdescgen.c,v 1.78 2014/10/21 14:08:35 nanard Exp $ */
+/* $Id: upnpdescgen.c,v 1.77 2014/03/10 11:04:53 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -159,8 +159,8 @@ static const struct XMLElt rootDesc[] =
 	{"/manufacturer", ROOTDEV_MANUFACTURER},	/* required */
 /* 8 */
 	{"/manufacturerURL", ROOTDEV_MANUFACTURERURL},	/* optional */
-	{"/modelDescription", friendly_name}, /* recommended */
-	{"/modelName", friendly_name},	/* required */
+	{"/modelDescription", ROOTDEV_MODELDESCRIPTION}, /* recommended */
+	{"/modelName", ROOTDEV_MODELNAME},	/* required */
 	{"/modelNumber", modelnumber},
 	{"/modelURL", ROOTDEV_MODELURL},
 #endif

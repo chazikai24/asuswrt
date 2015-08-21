@@ -71,6 +71,14 @@ extern struct mime_handler mime_handlers[];
 #define LOGINLOCK	7
 #define ISLOGOUT	8
 
+/* image path for app */
+#define IMAGE_MODEL_PRODUCT	"/images/Model_product.png"
+#define IMAGE_WANUNPLUG		"/images/WANunplug.png"
+#define IMAGE_ROUTER_MODE	"/images/New_ui/rt.jpg"
+#define IMAGE_REPEATER_MODE	"/images/New_ui/re.jpg"
+#define IMAGE_AP_MODE		"/images/New_ui/ap.jpg"
+#define IMAGE_MEDIA_BRIDGE_MODE	"/images/New_ui/mb.jpg"
+
 /* Exception MIME handler */
 struct except_mime_handler {
 	char *pattern;
@@ -237,7 +245,7 @@ extern void set_cgi(char *name, char *value);
 /* httpd.c */
 extern void start_ssl(void);
 extern char *gethost(void);
-extern void http_logout(unsigned int ip, char *cookies);
+extern void http_logout(unsigned int ip, char *cookies, int fromapp_flag);
 extern int is_auth(void);
 extern int is_firsttime(void);
 extern char *generate_token(void);

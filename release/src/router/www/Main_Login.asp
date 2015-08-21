@@ -11,87 +11,79 @@
 <title>ASUS Login</title>
 <style>
 .content{
-width:580px;
-height:526px;
-margin: 20px auto 40px auto;
-background:rgba(40,52,55,0.1);
+	width:580px;
+	height:526px;
+	background:rgba(40,52,55,0.1);
 }
 .wrapper{
-background:url(images/New_ui/login_bg.png) #283437 no-repeat;
-background-size: 1280px 1076px;
-background-position: center 0%;
-width:99%;
-height:100%;
+	background:url(images/New_ui/login_bg.png) #283437 no-repeat;
+	background-size: 1280px 1076px;
+	background-position: center 0%;
+	margin: 0px; 
 }
-
 .title_name {
-font-family:Arial;
-font-size: 40pt;
-color:#93d2d9;
+	font-family:Arial;
+	font-size: 40pt;
+	color:#93d2d9;
 }
 .prod_madelName{
-font-family: Arial;
-font-size: 26pt;
-color:#fff;
+	font-family: Arial;
+	font-size: 26pt;
+	color:#fff;
 }
 .p1{
-font-family: Arial;
-font-size: 16pt;
-color:#fff;
+	font-family: Arial;
+	font-size: 16pt;
+	color:#fff;
 }
-
 .button{
-background:rgba(255,255,255,0.1);
-border: solid 1px #6e8385;
-border-radius: 4px ;
-transition: visibility 0s linear 0.218s,opacity 0.218s,background-color 0.218s;
-height: 68px;
-width: 253px;
-font-family: Arial;
-font-size: 28pt;
-color:#fff;
-color:#000\9; /* IE6 IE7 IE8 */
-text-align:center;
-Vertical-align:center
+	background:rgba(255,255,255,0.1);
+	border: solid 1px #6e8385;
+	border-radius: 4px ;
+	transition: visibility 0s linear 0.218s,opacity 0.218s,background-color 0.218s;
+	height: 68px;
+	width: 300px;
+	font-family: Arial;
+	font-size: 28pt;
+	color:#fff;
+	color:#000\9; /* IE6 IE7 IE8 */
+	text-align:center;
+	vertical-align:center
 }
-
 .button_text{
-font-family: Arial;
-font-size: 28pt;
-color:#fff;
-text-align:center;
-Vertical-align:center
+	font-family: Arial;
+	font-size: 28pt;
+	color:#fff;
+	text-align:center;
+	vertical-align:center
 }
-
 .form_input{
-background-color:rgba(255,255,255,0.2);
-border-radius: 4px;
-padding:26px 22px;
-width: 480px;
-border: 0;
-height:25px;
-color:#fff;
-color:#000\9; /* IE6 IE7 IE8 */
-font-size:28px
+	background-color:rgba(255,255,255,0.2);
+	border-radius: 4px;
+	padding:26px 22px;
+	width: 480px;
+	border: 0;
+	height:25px;
+	color:#fff;
+	color:#000\9; /* IE6 IE7 IE8 */
+	font-size:28px
 }
-
 .form_input_text{
-font-family: Arial;
-font-size: 28pt;
-color:#a9a9a9;
+	font-family: Arial;
+	font-size: 28pt;
+	color:#a9a9a9;
 }
-
 .p2{
-font-family: Arial;
-font-size: 18pt;
-color:#28fff7;
+	font-family: Arial;
+	font-size: 18pt;
+	color:#28fff7;
 }
 </style>
 <script>
 var flag = '<% get_parameter("error_status"); %>';
+var redirect_page = '<% get_parameter("page"); %>';
 
 function initial(){
-	document.form.login_username.focus();
 	if(flag != ""){
 		document.getElementById("error_status_field").style.display ="";
 		if(flag == 3)
@@ -103,7 +95,27 @@ function initial(){
 		}else
 			document.getElementById("error_status_field").style.display ="none";
 	}
-	history.pushState("", document.title, window.location.pathname);
+
+	document.getElementById("loginTable").style.height = window.innerHeight + "px";
+	document.getElementById("loginTable").style.display = "";
+	document.form.login_username.focus();
+	window.onresize = function(){
+		document.getElementById("loginTable").style.height = window.innerHeight + "px";
+	};
+
+	document.form.login_username.onkeyup = function(e){
+		if(e.keyCode == 13){
+			document.form.login_passwd.focus();
+		}
+	};
+
+	document.form.login_passwd.onkeyup = function(e){
+		if(e.keyCode == 13){
+			login();
+		}
+	};
+
+	if(history.pushState != undefined) history.pushState("", document.title, window.location.pathname);
 }
 
 function trim(val){
@@ -168,6 +180,10 @@ function login(){
 	document.form.login_username.disabled = true;
 	document.form.login_passwd.disabled = true;
 	document.form.foilautofill.disabled = true;
+	if(redirect_page == "" || redirect_page == "Logout.asp" || redirect_page == "Main_Login.asp")
+		document.form.next_page.value = "index.asp";
+	else
+		document.form.next_page.value = redirect_page;
 	document.form.submit();
 }
 </script>
@@ -175,7 +191,7 @@ function login(){
 <body class="wrapper" onload="initial();">
 <iframe name="hidden_frame" id="hidden_frame" width="0" height="0" frameborder="0"></iframe>
 
-<form method="post" name="form" action="/login.cgi" target="hidden_frame" onsubmit="return login();">
+<form method="post" name="form" action="/login.cgi" target="hidden_frame">
 <input type="hidden" name="group_id" value="">
 <input type="hidden" name="action_mode" value="">
 <input type="hidden" name="action_script" value="">
@@ -185,8 +201,7 @@ function login(){
 <input type="hidden" name="flag" value="">
 <input type="hidden" name="login_authorization" value="">
 <input name="foilautofill" style="display: none;" type="password">
-<table align="center" cellpadding="0" cellspacing="0">
-	<tr height="115px"></tr>
+<table id="loginTable" align="center" cellpadding="0" cellspacing="0" style="display:none">
 	<tr>
 		<td>
 			<div>
@@ -203,19 +218,19 @@ function login(){
 						<td colspan="2"><div class="prod_madelName" style="margin-left:78px;"><#Web_Title2#></div></td>
 					</tr>
 					<tr>
-						<td colspan="2"><div class="p1" style="margin:35px 0px 0px 78px;">Sign In with Your ASUS Router Account</div></td>
+						<td colspan="2"><div class="p1" style="margin:35px 0px 0px 78px;"><#Sign_in_title#></div></td>
 					</tr>					
 					<tr style="height:72px;">
 						<td colspan="2">
 							<div style="margin:20px 0px 0px 78px;">
-								<input type="text" id="login_username" name="login_username" tabindex="1" class="form_input" maxlength="20" value="" autocapitalization="off" autocomplete="off" placeholder="Username">
+								<input type="text" id="login_username" name="login_username" tabindex="1" class="form_input" maxlength="20" value="" autocapitalization="off" autocomplete="off" placeholder="<#HSDPAConfig_Username_itemname#>">
 							</div>
 						</td>
 					</tr>
 					<tr style="height:72px;">
 						<td colspan="2">
 							<div style="margin:30px 0px 0px 78px;">
-								<input type="password" autocapitalization="off" autocomplete="off" value="" name="login_passwd" tabindex="2" class="form_input" maxlength="16" onkeyup="" onpaste="return false;"/ onBlur="" placeholder="Password">
+								<input type="password" autocapitalization="off" autocomplete="off" value="" name="login_passwd" tabindex="2" class="form_input" maxlength="16" onkeyup="" onpaste="return false;"/ onBlur="" placeholder="<#HSDPAConfig_Password_itemname#>">
 							</div>
 						</td>
 					</tr>
@@ -227,7 +242,7 @@ function login(){
 					<tr align="right" style="height:68px;">
 						<td colspan="2">
 							<div style="text-align: center;float:right; margin:50px 0px 0px 78px;">
-								<input type="submit" class="button" onclick="login();" value="Sign In">
+								<input type="button" class="button" onclick="login();" value="<#CTL_signin#>">
 							</div>	
 						</td>
 					</tr>
@@ -235,7 +250,6 @@ function login(){
 			</div>
 		</td>
 	</tr>
-	<tr></tr>
 </table>
 </form>
 </body>

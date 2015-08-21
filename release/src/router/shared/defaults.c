@@ -29,12 +29,14 @@ struct nvram_tuple router_defaults[] = {
 	{ "nvramver", RTCONFIG_NVRAM_VER},
 	{ "restore_defaults",	"0"	},	// Set to 0 to not restore defaults on boot
 #ifdef RPAC68U
-	{ "sw_mode", "2" 		}, 	// big switch for different mode 
+	{ "sw_mode", "2" 		}, 	// big switch for different mode
+#elif defined(RTCONFIG_DEFAULT_AP_MODE)
+	{ "sw_mode", "3" 		}, 	// big switch for different mode
 #else
-	{ "sw_mode", "1" 		}, 	// big switch for different mode 
+	{ "sw_mode", "1" 		}, 	// big switch for different mode
 #endif
 	{ "preferred_lang", "EN"	},
-	// NVRAM from init_nvram: system wide parameters accodring to model and mode 
+	// NVRAM from init_nvram: system wide parameters accodring to model and mode
 	//{ "wan_ifnames", "" },
 	//{ "lan_ifnames", "" },
 	//{ "lan1_ifnames", "" },
@@ -119,7 +121,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "wl_gascbdel",	"0", 0 },	/* GAS CB Delay */
 	{ "wl_4framegas",	"0", 0 },	/* 4 Frame GAS */
 
-	/* ---- temporary ----------------------------------- */	
+	/* ---- temporary ----------------------------------- */
 	{ "wl_osuicon_id",	"1", 0 },	/* OSU Provider's Icon ID */
 	{ "wl_conn_id",		"1", 0 },	/* Connection Capability ID */
 
@@ -299,7 +301,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "wl1_nband", "1"},			/* 5 GHz */
 #else
 	{ "wl_nband", "2", 0},			/* N-BAND */
-#ifdef RTAC3200
+#if defined (RTAC3200) || defined (RTAC5300)
 	{ "wl1_nband", "1"},
 	{ "wl2_nband", "1"},
 #else
@@ -464,11 +466,11 @@ struct nvram_tuple router_defaults[] = {
 // open/shared/psk/wpa/radius
 	{ "wl_wep_x", 			"0"	},
 // WEP data encryption 0, 1, 2 : disabled/5/13
-	{ "wl_timesched", 		"1"	},
+	{ "wl_timesched", 		"0"	},
 	{ "wl_radio_date_x",	"1111111"	},
 	{ "wl_radio_time_x",	"00002359"	},
 	{ "wl_radio_time2_x",	"00002359"	},
-	{ "wl_sched",           ""              },
+	{ "wl_sched",		"000000"	},
 	{ "wl_phrase_x",	""		},	// Passphrase	// Add
 	{ "wl_lanaccess", 	"off"		},
 	{ "wl_expire", 		"0"		},
@@ -497,6 +499,43 @@ struct nvram_tuple router_defaults[] = {
 #endif
 
 #if defined (RTCONFIG_WIRELESSREPEATER) || defined (RTCONFIG_PROXYSTA)
+#if defined (RTCONFIG_CONCURRENTREPEATER)
+	/* 2.4GHz */
+	{ "wlc0_list",                  ""      },
+	{ "wlc0_ssid",                  ""      },
+	{ "wlc0_wep",                   ""      },
+	{ "wlc0_key",                   ""      },
+	{ "wlc0_wep_key",               ""      },
+	{ "wlc0_auth_mode",             ""      },
+	{ "wlc0_crypto",                ""      },
+	{ "wlc0_wpa_psk",               ""      },
+	{ "wlc0_state", 		"0"	},
+	{ "wlc0_sbstate", 		"0"	},
+	{ "wlc0_scan_state", 		"0"	},
+	{ "wlc0_mode", 			"0"	},
+	{ "wlc0_ure_ssid",              ""      },
+	/* 5GHz */
+	{ "wlc1_list",                  ""      },
+	{ "wlc1_ssid",                  ""      },
+	{ "wlc1_wep",                   ""      },
+	{ "wlc1_key",                   ""      },
+	{ "wlc1_wep_key",               ""      },
+	{ "wlc1_auth_mode",             ""      },
+	{ "wlc1_crypto",                ""      },
+	{ "wlc1_wpa_psk",               ""      },
+	{ "wlc1_state", 		"0"	},
+	{ "wlc1_sbstate", 		"0" 	},
+	{ "wlc1_scan_state", "0"},
+	{ "wlc1_mode",		        "0"	},
+	{ "wlc1_ure_ssid",              ""	},
+#ifndef RTCONFIG_BCMWL6
+	{ "wlc0_nbw_cap",               ""      },
+	{ "wlc1_nbw_cap",               ""      },
+#else
+	{ "wlc0_bw_cap",                ""      },
+	{ "wlc1_bw_cap",                ""      },
+#endif
+#else
 	{ "wlc_list",			""	},
 	{ "wlc_band",			""	},
 	{ "wlc_ssid", 			"8f3610e3c9feabed953a6"	},
@@ -513,7 +552,8 @@ struct nvram_tuple router_defaults[] = {
 #endif
 	{ "wlc_ure_ssid",		""	},
 #endif
-
+	{ "wlc_express",                "0"     },      /* 0: disabled, 1: 2.4GHz, 2: 5GHz */
+#endif
 #ifdef RTCONFIG_PROXYSTA
 	{ "wlc_psta",			"0"	},	/* 0: disabled, 1: Proxy STA, 2: Proxy STA Repeater */
 	{ "wlc_band_ex",		""	},	/* another psta band */
@@ -575,7 +615,7 @@ struct nvram_tuple router_defaults[] = {
 #endif
 #endif
 
-// WPS 
+// WPS
 //	#if defined (W7_LOGO) || defined (WIFI_LOGO)
 	{ "wps_enable", "1"},
 //	#else
@@ -692,7 +732,23 @@ struct nvram_tuple router_defaults[] = {
 	{"wl1_bsd_if_qualify_policy", "60 0x0", 0 },
 	{"wl2_bsd_if_qualify_policy", "0 0x4", 0 },
 	{"bsd_bounce_detect", "180 1 3600", 0 },
+#elif RTAC5300
+        {"bsd_ifnames", "eth1 eth2 eth3", 0 },
+        {"wl0_bsd_steering_policy", "0 5 3 -52 0 110 0x22", 0 },
+        {"wl1_bsd_steering_policy", "80 5 3 -82 0 0 0x0", 0 },
+        {"wl2_bsd_steering_policy", "0 5 3 -82 0 0 0x8", 0 },
+        {"wl0_bsd_sta_select_policy", "2 -52 0 110 0 0 -1 0 0 0 0x122", 0 },
+        {"wl1_bsd_sta_select_policy", "2 -82 0 0 0 0 1 0 0 0 0x4", 0 },
+        {"wl2_bsd_sta_select_policy", "2 -82 0 0 0 0 1 0 0 0 0x8", 0 },
+        {"wl0_bsd_if_select_policy", "eth3 eth2", 0 },
+        {"wl1_bsd_if_select_policy", "eth1 eth3", 0 },
+        {"wl2_bsd_if_select_policy", "eth1 eth2", 0 },
+        {"wl0_bsd_if_qualify_policy", "0 0x0", 0 },
+        {"wl1_bsd_if_qualify_policy", "60 0x0", 0 },
+        {"wl2_bsd_if_qualify_policy", "0 0x4", 0 },
+        {"bsd_bounce_detect", "180 1 3600", 0 },
 #endif
+
 	{"bsd_scheme", "2", 0 },
 #endif
 #ifdef BCM_SSD
@@ -748,14 +804,18 @@ struct nvram_tuple router_defaults[] = {
 //	{ "pktc_disable", 		"0"		},
 //#endif
 
-	// NVRAM for start_lan: 
+	// NVRAM for start_lan:
 // LAN H/W parameters
 	{ "lan_hwnames",		""		},	// LAN driver names (e.g. et0)
 	{ "lan_hwaddr",			""		},	// LAN interface MAC address
 
 	// LAN TCP/IP parameters
 	{ "lan_unit",			"-1"		},
+#if defined(RTCONFIG_DEFAULT_AP_MODE)
+	{ "lan_proto",			"dhcp"	},	// DHCP server [static|dhcp]	//Barry add 2004 09 16
+#else
 	{ "lan_proto",			"static"	},	// DHCP server [static|dhcp]	//Barry add 2004 09 16
+#endif
 	{ "lan_ipaddr",			"192.168.1.1"	},	// LAN IP address
 	{ "lan_ipaddr_rt",		"192.168.1.1"	},
 	{ "lan_netmask",		"255.255.255.0"	},	// LAN netmask
@@ -766,6 +826,9 @@ struct nvram_tuple router_defaults[] = {
 	{ "lan_domain",			""		},	// LAN domain name
 	{ "lan_lease",			"86400"		},	// LAN lease time in seconds
 	{ "lan_stp",			"1"		},	// LAN spanning tree protocol
+#ifdef RTCONFIG_LACP
+	{ "lacp_enabled",			"0"		},	// LACP enable or not
+#endif
 	{ "lan_route",			""		},	// Static routes (ipaddr:netmask:gateway:metric:ifname ...)
 
 	{ "lan_dnsenable_x", "0"},
@@ -805,6 +868,9 @@ struct nvram_tuple router_defaults[] = {
 	{ "dhcp_staticlist", ""},
 	//{ "dhcpd_lmax", "253"},
 	{ "dhcpc_mode", "1"},
+#ifdef RTCONFIG_DHCP_OVERRIDE
+	{ "dnsqmode", "2"},
+#endif
 
 	// NVRAM for start_dhcpd
 	// Guest DHCP server parameters
@@ -944,7 +1010,11 @@ struct nvram_tuple router_defaults[] = {
 
 	{ "wandog_enable", "0" },
 	{ "wandog_target", "" },
+#ifdef RT4GAC55U
+	{ "wandog_interval", "3" }, // Be the same with lteled's interval.
+#else
 	{ "wandog_interval", "5" },
+#endif
 	{ "wandog_maxfail", "12" },
 	{ "wandog_delay", "0" },
 	{ "wandog_fb_count", "4" },
@@ -1217,9 +1287,9 @@ struct nvram_tuple router_defaults[] = {
 	{ "qos_irates",	"100,100,100,100,100,0,0,0,0,0"},
 	{ "qos_enable",			"0"				}, // 0: off, 1: on
 #ifdef RTCONFIG_BWDPI
-	{ "qos_type",			"1"				}, // 0: Traditional, 1: Intelligence.
+	{ "qos_type",			"1"				}, // 0: Traditional, 1: Adaptive, 2 : bandwidth limiter
 #else
-	{ "qos_type",			"0"				}, // 0: Traditional, 1: Intelligence.
+	{ "qos_type",			"0"				}, // 0: Traditional, 1: Adaptive, 2 : bandwidth limiter
 #endif
 	{ "qos_method",			"0"				},
 	{ "qos_sticky",			"1"				},
@@ -1235,6 +1305,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "qos_burst0",			""				},
 	{ "qos_burst1",			""				},
 	{ "qos_default",		"3"				},
+	{ "qos_bw_rulelist",		""				},
 
 	// TriggerList
 	{ "autofw_enable_x", "0" },
@@ -1291,7 +1362,6 @@ struct nvram_tuple router_defaults[] = {
 	{ "bwdpi_rsa_check", "0" },		// signature update check
 	{ "bwdpi_alive", "10" },		// check dpi engine alive timeout
 	{ "bwdpi_app_rulelist", "9,20<8<4<0,5,6,15,17<13,24<1,3,14<7,10,11,21,23<<" }, // default APP priority of QoS
-	{ "bwdpi_test", "2" },			// backup plan : bwdpi_test=2
 	{ "bwdpi_sig_ver", "" },		// dpi engine signature version
 	{ "TM_EULA", "0"},			// EULA of Trend Micro
 	{ "apps_analysis", "0"},		// Apps Analysis in Adaptive QoS Live
@@ -1636,6 +1706,7 @@ struct nvram_tuple router_defaults[] = {
 #ifdef RTCONFIG_USB_MODEM
 	{ "usb_qmi", "1"},
 	{ "Dev3G", "AUTO"},
+	{ "modem_android", "0"},
 	{ "modem_enable", "1"}, // 0: disabled, 1: WCDMA, 2: CDMA2000, 3: TD-SCDMA, 4: WiMAX.
 #ifdef RT4GAC55U
 	{ "modem_autoapn", "1"}, // 0: disabled, 1: enabled, 2: don't change modem nvrams.
@@ -1671,12 +1742,15 @@ struct nvram_tuple router_defaults[] = {
 	{ "modem_warning_unit", "0"}, /* 0: GBytes  1: MBytes*/
 	{ "modem_sms_limit", "0"}, // 0: disable, 1: enable.
 	{ "modem_sms_phone", ""},
-	{ "modem_sms_message", "The data usage has reached the limit:"},
+	{ "modem_sms_message1", "This is a alert about the data usage is over:"},
+	{ "modem_sms_message2", "The data usage has reached the limit:"},
+	{ "modem_reg_time", "10"},
 #if defined(RTCONFIG_JFFS2) || defined(RTCONFIG_BRCM_NAND_JFFS2) || defined(RTCONFIG_UBIFS)
-	{ "modem_bytes_data_cycle", "1"},
+	{ "modem_bytes_data_cycle", "31"},
 	{ "modem_bytes_data_limit", "0"}, /* 0: disabled */
 	{ "modem_bytes_data_warning", "0"}, /* 0: disabled */
-#endif	
+	{ "modem_bytes_data_save", "1800"}, // the interval to save the data usage. need to be 30 times.
+#endif
 #endif
 
 	{ "udpxy_enable_x", "0"},
@@ -1973,6 +2047,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "vpn_crt_client3_ca",		""		},
 	{ "vpn_crt_client3_crt",	""		},
 	{ "vpn_crt_client3_key",	""		},
+	{ "vpn_crt_client3_crl",	""		},
 	{ "vpn_client3_userauth",	"0"		},
 	{ "vpn_client3_username",	""		},
 	{ "vpn_client3_password",	""		},
@@ -2008,6 +2083,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "vpn_crt_client4_ca",		""		},
 	{ "vpn_crt_client4_crt",	""		},
 	{ "vpn_crt_client4_key",	""		},
+	{ "vpn_crt_client4_crl",	""		},
 	{ "vpn_client4_userauth",	"0"		},
 	{ "vpn_client4_username",	""		},
 	{ "vpn_client4_password",	""		},
@@ -2043,6 +2119,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "vpn_crt_client5_ca",		""		},
 	{ "vpn_crt_client5_crt",	""		},
 	{ "vpn_crt_client5_key",	""		},
+	{ "vpn_crt_client5_crl",	""		},
 	{ "vpn_client5_userauth",	"0"		},
 	{ "vpn_client5_username",	""		},
 	{ "vpn_client5_password",	""		},
@@ -2106,21 +2183,24 @@ struct nvram_tuple router_defaults[] = {
 	{ "pushnotify_diskmonitor", "1"},
 	{ "PM_attach_syslog", ""},
 	{ "PM_attach_cfgfile", ""},
-	{ "PM_attach_iptables", ""},
 	{ "fb_country", ""},
-	{ "fb_ISP", ""},
-	{ "fb_Subscribed_Info", ""},
 	{ "fb_email", ""},
-	{ "fb_availability", ""},
 	{ "fb_comment", ""},
 	{ "fb_email_dbg", ""},	//send to email address
 	{ "fb_state", ""},
 	{ "fb_browserInfo", ""},
-#ifdef RTCONFIG_DSL	
+#ifdef RTCONFIG_DSL
 	// for web ui udentify , 0=notificaton, 1=close
 	{ "fb_experience", "0"},
-#endif
-#endif
+	{ "fb_ISP", ""},
+	{ "fb_Subscribed_Info", ""},
+	{ "PM_attach_iptables", ""},
+	{ "fb_availability", ""},
+#else
+	{ "fb_ptype", ""},
+	{ "fb_pdesc", ""},
+#endif /* RTCONFIG_DSL */
+#endif /* RTCONFIG_PUSH_EMAIL */
 
 #ifdef __CONFIG_NORTON__
 	{ "nga_lickey",			"0"		},
@@ -2176,9 +2256,6 @@ struct nvram_tuple router_defaults[] = {
 	{ "ipv6_dhcp_end",	""		},	// end of address pool
 	{ "ipv6_fw_enable",	"1"		},	// Default FORWARD table to DROP packets
 	{ "ipv6_fw_rulelist",	""		},	// IPv6 allowed forward rules
-#ifdef RTCONFIG_WIDEDHCP6
-	{ "ipv6_ra_conf",	"noneset"	},	// address configuration from WAN router advertisement
-#endif /* RTCONFIG_WIDEDHCP6 */
 	{ "ipv6_prefix_s",	""		},	// for ipv6 6in4
 	{ "ipv6_prefix_length_s", "64"		},	// for ipv6 6in4/other
 	{ "ipv6_rtr_addr_s",	""		},	// for ipv6 other
@@ -2263,7 +2340,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "Ate_reboot_delay",		"1"},
 #ifdef RTCONFIG_USER_LOW_RSSI
 	{ "wl_user_rssi",		"0"},		/* disabled by default, setting range: -70 ~ -90 */
-#if 0
+#ifndef RTCONFIG_BCMARM
 	{ "wl_lrc",			"2"},
 #endif
 	{ "rast_idlrt",			"2"},		/* roaming assistant idle rate (Kbps) */
@@ -2271,7 +2348,7 @@ struct nvram_tuple router_defaults[] = {
 	{ "custom_clientlist",		""},		/* for customize device name */
 	{ "nmp_client_list",		""},
 	{ "ttl_inc_enable",		"0"},		/* enable TTL increment */
-#ifdef RTCONFIG_TOR	
+#ifdef RTCONFIG_TOR
 	{ "Tor_enable",			"0"},		/* enable Tor Transparent Proxy	*/
 	{ "Tor_socksport",		"9050"},
 	{ "Tor_transport",		"9040"},
@@ -2293,6 +2370,18 @@ struct nvram_tuple router_defaults[] = {
 #ifdef RTCONFIG_CLOUDCHECK
 	{ "enable_cloudcheck",	"0"},
 #endif
+#ifdef RTCONFIG_RESTRICT_GUI
+	{ "fw_restrict_gui",	"0"},
+	{ "fw_restrict_gui_mac",	""},
+#endif
+	{ "kg_enable",	"0"},
+	{ "kg_wan_enable",	"0"},
+	{ "kg_powersaving_enable",	"0"},
+	{ "kg_wl_radio_enable",	"0"},
+	{ "kg_wl_radio",	"0"},
+	{ "kg_device_enable",	""},
+	{ "kg_devicename",	""},
+	{ "kg_mac",	""},
 	{ NULL, NULL }
 }; // router_defaults
 
@@ -2618,6 +2707,10 @@ struct nvram_tuple router_state_defaults[] = {
 	{ "dsllog_powerup", ""},
 	{ "dsllog_crcdown", ""},
 	{ "dsllog_crcup", ""},
+	{ "dsllog_farendvendorid", ""},
+	{ "dsllog_pathmodedown", ""},
+	{ "dsllog_pathmodeup", ""},
+	{ "dsllog_interleavedepth", ""},
 #endif
 
 #endif
@@ -2635,7 +2728,7 @@ struct nvram_tuple router_state_defaults[] = {
 	{ "data_usage_cycle", "30"},
 	{ "data_usage_limit", "8"},
 	{ "data_usage_warning", "6"},
-	{ "sim_mtu", "1492"},	
+	{ "sim_mtu", "1492"},
 	{ "modem_idletime", "600"},
 	{ NULL, NULL }
 };
@@ -2973,6 +3066,7 @@ struct nvram_tuple bcm4360ac_defaults[] = {
 };
 #elif defined(RTAC88U) || defined(RTAC3100)
 struct nvram_tuple bcm4360ac_defaults[] = {
+#if 0
 	{ "devpath0", "pci/1/1", 0 },
 	{ "0:sromrev", "13", 0 },
 	{ "0:boardrev", "0x1104", 0 },
@@ -3607,10 +3701,12 @@ struct nvram_tuple bcm4360ac_defaults[] = {
 	{ "1:rxgains2gtrisoa2", "7", 0 },
 	{ "1:rxgains2gtrelnabypa2", "1", 0 },
 	{ "1:noiselvl2ga3", "31", 0 },
+#endif
 	{ 0, 0, 0 }
 };
 #elif defined(RTAC5300)
 struct nvram_tuple bcm4360ac_defaults[] = {
+#if 0
 	{ "devpath0", "pcie/1/3", 0 },
 	{ "0:boardvendor", "0x14e4", 0 },
 	{ "0:venid", "0x14e4", 0 },
@@ -4231,7 +4327,6 @@ struct nvram_tuple bcm4360ac_defaults[] = {
 	{ "2:pa5ga3", "0x1c90,0xd31d,0x37b6,0x25c5,0x1e2e,0xcb5b,0x2a14,0x2498,0x1e3e,0xca6e,0x27aa,0x2433,0x1e0b,0xc835,0x23aa,0x23bf,0x1dcd,0xc6d0,0x221f,0x2395", 0 },
 	{ "2:pa5g40a3", "0x1d9b,0xd4a3,0x380f,0x2537,0x1ee9,0xdb17,0x4e7c,0x27d1,0x1ee8,0xda30,0x4b75,0x276c,0x1ef6,0xd489,0x3f53,0x2671,0x1eeb,0xcf2e,0x3527,0x25a1", 0 },
 	{ "2:pa5g80a3", "0x1f3d,0xd0b2,0x336e,0x2514,0x1f4c,0xe7be,0x5d6d,0x2843,0x1f8f,0xe325,0x5480,0x2791,0x1fb0,0xde51,0x4c9e,0x2733,0x1e50,0xda8b,0x490b,0x2703", 0 },
-	
 	{ "2:rpcal5gb0", "0", 0 },
 	{ "2:rpcal5gb1", "0", 0 },
 	{ "2:rpcal5gb2", "0", 0 },
@@ -4275,6 +4370,7 @@ struct nvram_tuple bcm4360ac_defaults[] = {
 	{ "2:swctrlmap4_RXByp5g_fem7to4", "0", 0 },
 	{ "2:swctrlmap4_misc5g_fem7to4", "0", 0 },
 	{ "2:srom13sig", "0x4D55", 0 },
+#endif
 	{ 0, 0, 0 }
 };
 #else
@@ -4489,152 +4585,3 @@ nvram_restore_var(char *prefix, char *name)
 		}
 	}
 }
-
-#ifdef RTCONFIG_TCODE
-struct tcode_nvram_s tcode_nvram_list[] = {
-#ifdef CONFIG_BCMWL5
-#ifdef RTAC68U
-//	{ MODEL_RTAC68U, "", "US/01", "color", "B"},
-//	{ MODEL_RTAC68U, "RT-AC68R", "US/01", "color", "B"},
-	{ MODEL_RTAC68U, "RT-AC68W", "US/01", "color", "W"},
-	{ MODEL_RTAC68U, "RT-AC68RW", "US/01", "color", "W"},
-//	{ MODEL_RTAC68U, "", "US/01", "color", "B"},
-//	{ MODEL_RTAC68U, "RT-AC68R", "CA/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "WE/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "UK/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "EE/01", "color", "B"},
-	{ MODEL_RTAC68U, "", "EU/01", "color", "W"},
-//	{ MODEL_RTAC68U, "", "AP/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "JP/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "SG/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "TW/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "CN/01", "color", "B"},
-//	{ MODEL_RTAC68U, "", "CN/02", "color", "B"},
-#endif
-#ifdef RTAC87U
-	{ MODEL_RTAC87U, "", "UK/02", "color", "W"},
-	{ MODEL_RTAC87U, "", "AP/02", "color", "R"},
-	{ MODEL_RTAC87U, "", "JP/02", "color", "R"},
-	{ MODEL_RTAC87U, "", "SG/02", "color", "R"},
-#endif
-#endif
-	{ 0, NULL, NULL, NULL }
-};
-
-struct tcode_rc_support_s tcode_rc_support_list[] = {
-	/* loclist: display country_code_list */
-	/* defpsk: disable security open_none */
-	/* yadns: enable Yandex.DNS */
-#ifdef CONFIG_BCMWL5
-#ifdef RTN12HP
-	// { MODEL_RTN12HP_B1, "RU/04", "yadns loclist"},
-	{ MODEL_RTN12HP_B1, "SG/07", "loclist"},
-#endif
-#ifdef RTAC66U
-	{ MODEL_RTAC66U, "AP/01", "loclist"},
-	{ MODEL_RTAC66U, "SG/01", "loclist"},
-	{ MODEL_RTAC66U, "CN/01", "loclist"},
-	{ MODEL_RTAC66U, "KR/01", "defpsk loclist"},
-#endif
-#ifdef RTAC68U
-	{ MODEL_RTAC68U, "AP/01", "loclist"},
-	{ MODEL_RTAC68U, "SG/01", "loclist"},
-	{ MODEL_RTAC68U, "CN/01", "loclist"},
-	{ MODEL_RTAC68U, "CN/02", "loclist"},
-	{ MODEL_RTAC68U, "KR/01", "defpsk loclist"},
-#endif
-#ifdef RTAC87U
-	{ MODEL_RTAC87U, "AP/01", "loclist"},
-	{ MODEL_RTAC87U, "AP/02", "loclist"},
-	{ MODEL_RTAC87U, "CN/01", "loclist"},
-	{ MODEL_RTAC87U, "SG/01", "loclist"},
-	{ MODEL_RTAC87U, "SG/02", "loclist"},
-	{ MODEL_RTAC87U, "KR/01", "defpsk loclist"},
-#endif
-#endif
-	{ 0, NULL, NULL }
-};
-
-struct tcode_location_s tcode_location_list[] = {
-	/* changing location */
-#ifdef CONFIG_BCMWL5
-#ifdef RTN12HP
-	{ MODEL_RTN12HP, "APAC", "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "AU",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "BZ",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "CA",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "CN",  "sb/1/ccode", "EU", "sb/1/regrev", "5", NULL, NULL},
-	{ MODEL_RTN12HP, "EU",  "sb/1/ccode", "EU", "sb/1/regrev", "5", NULL, NULL},
-	{ MODEL_RTN12HP, "JP",  "sb/1/ccode", "EU", "sb/1/regrev", "5", NULL, NULL},
-	{ MODEL_RTN12HP, "KR",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "MY",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "ME",  "sb/1/ccode", "EU", "sb/1/regrev", "5", NULL, NULL},
-	{ MODEL_RTN12HP, "RU",  "sb/1/ccode", "RU", "sb/1/regrev", "4", NULL, NULL},
-	{ MODEL_RTN12HP, "SG",  "sb/1/ccode", "SG", "sb/1/regrev", "7", NULL, NULL},
-	{ MODEL_RTN12HP, "TR",  "sb/1/ccode", "EU", "sb/1/regrev", "5", NULL, NULL},
-	{ MODEL_RTN12HP, "TW",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-	{ MODEL_RTN12HP, "UA",  "sb/1/ccode", "EU", "sb/1/regrev", "5", NULL, NULL},
-	{ MODEL_RTN12HP, "US",  "sb/1/ccode", "US", "sb/1/regrev", "16", NULL, NULL},
-#endif
-#ifdef RTAC66U
-	{ MODEL_RTAC66U, "APAC", "pci/1/1/ccode", "US", "pci/1/1/regrev", "0", "pci/2/1/ccode", "Q2", "pci/2/1/regrev", "33"},
-	{ MODEL_RTAC66U, "AU", "pci/1/1/ccode", "US", "pci/1/1/regrev", "0", "pci/2/1/ccode", "Q2", "pci/2/1/regrev", "33"},
-	{ MODEL_RTAC66U, "BZ", "pci/1/1/ccode", "US", "pci/1/1/regrev", "0", "pci/2/1/ccode", "Q2", "pci/2/1/regrev", "33"},
-	{ MODEL_RTAC66U, "CA", "pci/1/1/ccode", "US", "pci/1/1/regrev", "0", "pci/2/1/ccode", "US", "pci/2/1/regrev", "0"},
-	{ MODEL_RTAC66U, "CN", "pci/1/1/ccode", "CN", "pci/1/1/regrev", "1", "pci/2/1/ccode", "CN", "pci/2/1/regrev", "1"},
-	{ MODEL_RTAC66U, "EU", "pci/1/1/ccode", "EU", "pci/1/1/regrev", "13", "pci/2/1/ccode", "EU", "pci/2/1/regrev", "31"},
-	{ MODEL_RTAC66U, "JP", "pci/1/1/ccode", "EU", "pci/1/1/regrev", "13", "pci/2/1/ccode", "EU", "pci/2/1/regrev", "31"},
-	{ MODEL_RTAC66U, "KR", "pci/1/1/ccode", "KR", "pci/1/1/regrev", "44", "pci/2/1/ccode", "KR", "pci/2/1/regrev", "44"},
-	{ MODEL_RTAC66U, "MY", "pci/1/1/ccode", "US", "pci/1/1/regrev", "0", "pci/2/1/ccode", "Q2", "pci/2/1/regrev", "33"},
-	{ MODEL_RTAC66U, "ME", "pci/1/1/ccode", "EU", "pci/1/1/regrev", "13", "pci/2/1/ccode", "EU", "pci/2/1/regrev", "31"},
-	{ MODEL_RTAC66U, "RU", "pci/1/1/ccode", "EU", "pci/1/1/regrev", "13", "pci/2/1/ccode", "EU", "pci/2/1/regrev", "31"},
-	{ MODEL_RTAC66U, "SG", "pci/1/1/ccode", "SG", "pci/1/1/regrev", "0", "pci/2/1/ccode", "SG", "pci/2/1/regrev", "0"},
-	{ MODEL_RTAC66U, "TR", "pci/1/1/ccode", "EU", "pci/1/1/regrev", "13", "pci/2/1/ccode", "EU", "pci/2/1/regrev", "31"},
-	{ MODEL_RTAC66U, "TW", "pci/1/1/ccode", "TW", "pci/1/1/regrev", "0", "pci/2/1/ccode", "TW", "pci/2/1/regrev", "0"},
-	{ MODEL_RTAC66U, "UA", "pci/1/1/ccode", "EU", "pci/1/1/regrev", "13", "pci/2/1/ccode", "EU", "pci/2/1/regrev", "31"},
-	{ MODEL_RTAC66U, "US", "pci/1/1/ccode", "US", "pci/1/1/regrev", "0", "pci/2/1/ccode", "Q2", "pci/2/1/regrev", "33"},
-#endif
-#ifdef RTAC68U
-	{ MODEL_RTAC68U, "APAC", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "AU", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "BZ", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "CA", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "CN", "0:ccode", "CN", "0:regrev", "1", "1:ccode", "CN", "1:regrev", "1"},
-	{ MODEL_RTAC68U, "EU", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "13"},
-	{ MODEL_RTAC68U, "JP", "0:ccode", "JP", "0:regrev", "45", "1:ccode", "JP", "1:regrev", "47"},
-	{ MODEL_RTAC68U, "KR", "0:ccode", "KR", "0:regrev", "41", "1:ccode", "KR", "1:regrev", "41"},
-	{ MODEL_RTAC68U, "MY", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "ME", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "13"},
-	{ MODEL_RTAC68U, "RU", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "13"},
-	{ MODEL_RTAC68U, "SG", "0:ccode", "SG", "0:regrev", "0", "1:ccode", "SG", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "TR", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "13"},
-	{ MODEL_RTAC68U, "TW", "0:ccode", "TW", "0:regrev", "0", "1:ccode", "TW", "1:regrev", "0"},
-	{ MODEL_RTAC68U, "UA", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "13"},
-	{ MODEL_RTAC68U, "US", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-#endif
-#ifdef RTAC87U
-	{ MODEL_RTAC87U, "APAC", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "AU", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "BZ", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "CA", "0:ccode", "US", "0:regrev", "0", "1:ccode", "CA", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "CN", "0:ccode", "CN", "0:regrev", "1", "1:ccode", "CN", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "EU", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "JP", "0:ccode", "JP", "0:regrev", "45", "1:ccode", "JP", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "KR", "0:ccode", "KR", "0:regrev", "45", "1:ccode", "KR", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "MY", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "ME", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "RU", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "SG", "0:ccode", "SG", "0:regrev", "0", "1:ccode", "SG", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "TR", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "TW", "0:ccode", "US", "0:regrev", "0", "1:ccode", "TW", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "UA", "0:ccode", "EU", "0:regrev", "13", "1:ccode", "EU", "1:regrev", "0"},
-	{ MODEL_RTAC87U, "US", "0:ccode", "US", "0:regrev", "0", "1:ccode", "US", "1:regrev", "0"},
-#endif
-#endif
-#ifdef RTCONFIG_TRI_BAND_5G
-	{ 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
-#else
-	{ 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
-#endif
-};
-#endif	/* RTCONFIG_TCODE */

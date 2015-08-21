@@ -1127,6 +1127,30 @@ void write_yandexdns_filter6(FILE *fp, char *lan_if, char *lan_ip)
 #endif /* RTCONFIG_IPV6 */
 #endif /* RTCONFIG_YANDEXDNS */
 
+#ifdef RTCONFIG_REDIRECT_DNAME
+void redirect_nat_setting(){
+	FILE *fp;
+	char *lan_ip = nvram_safe_get("lan_ipaddr");
+	char name[PATH_MAX];
+
+	sprintf(name, "%s_%s", NAT_RULES,nvram_safe_get("productid"));
+	if((fp = fopen(name, "w")) == NULL)
+		return;
+
+	fprintf(fp, "*nat\n"
+		":PREROUTING ACCEPT [0:0]\n"
+		":POSTROUTING ACCEPT [0:0]\n"
+		":OUTPUT ACCEPT [0:0]\n");
+	fprintf(fp, "-A PREROUTING -p udp --dport 53 -j DNAT --to-destination %s:53\n", lan_ip);
+	fprintf(fp, "COMMIT\n");
+
+	fclose(fp);
+
+	unlink(NAT_RULES);
+	symlink(name, NAT_RULES);
+
+}
+#endif
 #ifdef RTCONFIG_WIRELESSREPEATER
 void repeater_nat_setting(){
 	FILE *fp;
@@ -1144,6 +1168,9 @@ void repeater_nat_setting(){
 
 	fprintf(fp, "-A PREROUTING -d 10.0.0.1 -p tcp --dport 80 -j DNAT --to-destination %s:80\n", lan_ip);
 	fprintf(fp, "-A PREROUTING -d %s -p tcp --dport 80 -j DNAT --to-destination %s:80\n", nvram_default_get("lan_ipaddr"), lan_ip);
+#ifdef RTCONFIG_REDIRECT_DNAME
+	fprintf(fp, "-A PREROUTING -p udp --dport 53 -j DNAT --to-destination %s:53\n", lan_ip);
+#endif	
 	fprintf(fp, "-A PREROUTING -p udp --dport 53 -j DNAT --to-destination %s:18018\n", lan_ip);
 	fprintf(fp, "COMMIT\n");
 
@@ -1796,6 +1823,19 @@ start_default_filter(int lanunit)
 	    ":logaccept - [0:0]\n"
 	    ":logdrop - [0:0]\n");
 
+#ifdef RTCONFIG_RESTRICT_GUI
+	char word[PATH_MAX], *next_word;
+
+	if(nvram_get_int("fw_restrict_gui") && strlen(nvram_safe_get("fw_restrict_gui_mac"))){
+		foreach_60(word, nvram_safe_get("fw_restrict_gui_mac"), next_word){
+			fprintf(fp, "-A INPUT -i %s -m mac --mac-source %s -d %s -p tcp -m multiport --dport 23,80,%s,9999 -j ACCEPT\n",
+					nvram_safe_get("lan_ifname"), word, nvram_safe_get("lan_ipaddr"), nvram_safe_get("https_lanport"));
+		}
+		fprintf(fp, "-A INPUT -i %s -d %s -p tcp -m multiport --dport 23,80,%s,9999 -j DROP\n",
+				nvram_safe_get("lan_ifname"), nvram_safe_get("lan_ipaddr"), nvram_safe_get("https_lanport"));
+	}
+#endif
+
 	fprintf(fp, "-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT\n");
 	fprintf(fp, "-A INPUT -m state --state INVALID -j DROP\n");
 	fprintf(fp, "-A INPUT -i %s -m state --state NEW -j ACCEPT\n", "lo");
@@ -2260,7 +2300,7 @@ TRACE_PT("writing Parental Control\n");
 
 		strcpy(macaccept, "PControls");
 	}
-#else
+#else // RTCONFIG_PARENTALCTRL
 	// FILTER from LAN to WAN Source MAC
 	if (!nvram_match("macfilter_enable_x", "0"))
 	{
@@ -2314,7 +2354,20 @@ TRACE_PT("writing Parental Control\n");
 			}
 			free(nv);
 		}
-#endif
+#endif // RTCONFIG_OLD_PARENTALCTRL
+	}
+#endif // RTCONFIG_PARENTALCTRL
+
+#ifdef RTCONFIG_RESTRICT_GUI
+	char word[PATH_MAX], *next_word;
+
+	if(nvram_get_int("fw_restrict_gui") && strlen(nvram_safe_get("fw_restrict_gui_mac"))){
+		foreach_60(word, nvram_safe_get("fw_restrict_gui_mac"), next_word){
+			fprintf(fp, "-A INPUT -i %s -m mac --mac-source %s -d %s -p tcp -m multiport --dport 23,80,%s,9999 -j ACCEPT\n",
+					nvram_safe_get("lan_ifname"), word, nvram_safe_get("lan_ipaddr"), nvram_safe_get("https_lanport"));
+		}
+		fprintf(fp, "-A INPUT -i %s -d %s -p tcp -m multiport --dport 23,80,%s,9999 -j DROP\n",
+				nvram_safe_get("lan_ifname"), nvram_safe_get("lan_ipaddr"), nvram_safe_get("https_lanport"));
 	}
 #endif
 
@@ -3249,7 +3302,7 @@ TRACE_PT("writing Parental Control\n");
 
 		strcpy(macaccept, "PControls");
 	}
-#else
+#else // RTCONFIG_PARENTALCTRL
 	// FILTER from LAN to WAN Source MAC
 	if (!nvram_match("macfilter_enable_x", "0"))
 	{
@@ -3303,7 +3356,20 @@ TRACE_PT("writing Parental Control\n");
 			}
 			free(nv);
 		}
-#endif
+#endif // RTCONFIG_OLD_PARENTALCTRL
+	}
+#endif // RTCONFIG_PARENTALCTRL
+
+#ifdef RTCONFIG_RESTRICT_GUI
+	char word[PATH_MAX], *next_word;
+
+	if(nvram_get_int("fw_restrict_gui") && strlen(nvram_safe_get("fw_restrict_gui_mac"))){
+		foreach_60(word, nvram_safe_get("fw_restrict_gui_mac"), next_word){
+			fprintf(fp, "-A INPUT -i %s -m mac --mac-source %s -d %s -p tcp -m multiport --dport 23,80,%s,9999 -j ACCEPT\n",
+					nvram_safe_get("lan_ifname"), word, nvram_safe_get("lan_ipaddr"), nvram_safe_get("https_lanport"));
+		}
+		fprintf(fp, "-A INPUT -i %s -d %s -p tcp -m multiport --dport 23,80,%s,9999 -j DROP\n",
+				nvram_safe_get("lan_ifname"), nvram_safe_get("lan_ipaddr"), nvram_safe_get("https_lanport"));
 	}
 #endif
 
@@ -4323,7 +4389,7 @@ write_porttrigger(FILE *fp, char *wan_if, int is_nat)
 void
 mangle_setting(char *wan_if, char *wan_ip, char *lan_if, char *lan_ip, char *logaccept, char *logdrop)
 {
-	if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") == 0){
+	if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") != 1){
 			add_iQosRules(wan_if);
 	}
 	else {
@@ -4370,10 +4436,7 @@ mangle_setting(char *wan_if, char *wan_ip, char *lan_if, char *lan_ip, char *log
 	if(nvram_match("ctf_disable", "0")) {
 #ifdef RTCONFIG_BWDPI
 		/* DPI engine */
-		if(nvram_get_int("bwdpi_test") == 1){
-			// do nothing
-		}
-		else if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") == 1){
+		if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") == 1){
 				eval("iptables", "-t", "mangle", "-N", "BWDPI_FILTER");
 				eval("iptables", "-t", "mangle", "-F", "BWDPI_FILTER");
 				eval("iptables", "-t", "mangle", "-A", "BWDPI_FILTER", "-i", wan_if, "-p", "udp", "--sport", "68", "--dport", "67", "-j", "DROP");
@@ -4428,7 +4491,7 @@ mangle_setting2(char *lan_if, char *lan_ip, char *logaccept, char *logdrop)
 	char tmp[100], prefix[] = "wanXXXXXXXXXX_";
 	char *wan_if;
 
-	if(nvram_get_int("qos_enable") == 1){
+	if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") != 1){
 		for(unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; ++unit){
 			snprintf(prefix, sizeof(prefix), "wan%d_", unit);
 			if(nvram_get_int(strcat_r(prefix, "state_t", tmp)) != WAN_STATE_CONNECTED)
@@ -4485,10 +4548,7 @@ mangle_setting2(char *lan_if, char *lan_ip, char *logaccept, char *logdrop)
 	if(nvram_match("ctf_disable", "0")) {
 #ifdef RTCONFIG_BWDPI
 		/* DPI engine */
-		if(nvram_get_int("bwdpi_test") == 1){
-			// do nothing
-		}
-		else if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") == 1){
+		if(nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") == 1){
 				eval("iptables", "-t", "mangle", "-N", "BWDPI_FILTER");
 				eval("iptables", "-t", "mangle", "-F", "BWDPI_FILTER");
 

@@ -354,7 +354,6 @@ function afterLiveUpdate(){
 function initial(){
 	var isWLclient = function () {  //detect login client is by wireless or wired
 		<% login_state_hook(); %>
-					return true;  //wireless
 		var wireless = [<% wl_auth_list(); %>];	// [[MAC, associated, authorized], ...]
 						
 		if(wireless.length > 0) {
@@ -414,6 +413,9 @@ function initial(){
 			if(action_script.search("restart_wireless") != -1 || action_script.search("restart_all") != -1  || action_script.search("reboot") != -1){
 				showWlHint();
 				return;
+			}
+			if(current_page.indexOf("index.asp") >= 0){
+				parent.showLoading(restart_time, "waiting");
 			}
 		}
 		else if(getflag == "finish"){

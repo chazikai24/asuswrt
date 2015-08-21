@@ -166,7 +166,7 @@ int reload_from_lease_file()
 	if(!lease_file) return -1;
 	fd = fopen( lease_file, "r");
 	if (fd==NULL) {
-		syslog(LOG_ERR, "could not open lease file: %s", lease_file);
+		syslog(LOG_DEBUG, "could not open lease file: %s", lease_file);
 		return -1;
 	}
 	if(unlink(lease_file) < 0) {
@@ -288,7 +288,14 @@ upnp_redirect(const char * rhost, unsigned short eport,
 		 * xbox 360 does not keep track of the port it redirects and will
 		 * redirect another port when receiving ConflictInMappingEntry */
 		if(strcmp(iaddr, iaddr_old)==0 && iport==iport_old) {
-			syslog(LOG_INFO, "ignoring redirect request as it matches existing redirect");
+			/* redirection already existing */
+			syslog(LOG_INFO, "port %hu %s already redirected to %s:%hu, replacing",
+			       eport, (proto==IPPROTO_TCP)?"tcp":"udp", iaddr_old, iport_old);
+			/* remove and then add again */
+			if(_upnp_delete_redir(eport, proto) < 0) {
+				syslog(LOG_ERR, "failed to remove port mapping");
+			} else
+				goto redirect;
 		} else {
 
 			syslog(LOG_INFO, "port %hu protocol %s already redirected to %s:%hu",
@@ -302,6 +309,7 @@ upnp_redirect(const char * rhost, unsigned short eport,
 		return -2;
 #endif /* CHECK_PORTINUSE */
 	} else {
+redirect:
 		timestamp = (leaseduration > 0) ? time(NULL) + leaseduration : 0;
 		syslog(LOG_INFO, "redirecting port %hu to %s:%hu protocol %s for: %s",
 			eport, iaddr, iport, protocol, desc);
@@ -546,7 +554,7 @@ get_upnp_rules_state_list(int max_rules_number_target)
 	{
 		if(tmp->to_remove)
 		{
-			syslog(LOG_NOTICE, "remove port mapping %hu %s because it has expired",
+			syslog(LOG_DEBUG, "remove port mapping %hu %s because it has expired",
 			       tmp->eport, (tmp->proto==IPPROTO_TCP)?"TCP":"UDP");
 			_upnp_delete_redir(tmp->eport, tmp->proto);
 			*p = tmp->next;
@@ -588,8 +596,8 @@ remove_unused_rules(struct rule_state * list)
 		{
 			if(packets == list->packets && bytes == list->bytes)
 			{
-				_upnp_delete_redir(list->eport, list->proto);
-				n++;
+				if(_upnp_delete_redir(list->eport, list->proto) >= 0)
+					n++;
 			}
 		}
 		tmp = list;
@@ -597,7 +605,7 @@ remove_unused_rules(struct rule_state * list)
 		free(tmp);
 	}
 	if(n>0)
-		syslog(LOG_NOTICE, "removed %d unused rules", n);
+		syslog(LOG_DEBUG, "removed %d unused rules", n);
 }
 
 /* upnp_get_portmappings_in_range()

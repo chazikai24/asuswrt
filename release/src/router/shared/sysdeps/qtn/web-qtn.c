@@ -1148,7 +1148,7 @@ void rpc_set_radio(int unit, int subunit, int on)
 		}
 	}
 	else {
-		ret = qcsapi_wifi_rfenable(WIFINAME, (qcsapi_unsigned_int) on);
+		ret = qcsapi_wifi_rfenable((qcsapi_unsigned_int) on);
 		if (ret < 0)
 			dbG("Qcsapi qcsapi_wifi_rfenable %s, return: %d\n", WIFINAME, ret);
 	}

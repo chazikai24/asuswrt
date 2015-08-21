@@ -6,6 +6,7 @@
 
 CFLAGS = -I$(TOP)/openssl/include -I$(TOP)/curl-7.21.7/include
 CFLAGS += -I$(SRCBASE) -I$(SRCBASE)/include -I. -I$(TOP)/shared -D_FILE_OFFSET_BITS=64 -DNVRAM_
+CFLAGS += $(if $(QCA),$(EXTRACFLAGS))
 
 LDFLAGS = -L$(TOP)/curl-7.21.7/lib/.libs -L$(TOP)/openssl -L$(TOP)/nvram${BCMEX} -L$(TOP)/shared -lshared
 

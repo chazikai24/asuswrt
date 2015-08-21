@@ -291,9 +291,6 @@ OBJS-$(CONFIG_CONCAT_PROTOCOL)           += concat.o
 # libavdevice dependencies
 OBJS-$(CONFIG_JACK_INDEV)                += timefilter.o
 
-# ASUS utility
-OBJS+= asus_utils.o
-
 EXAMPLES  = output
 TESTPROGS = timefilter
 

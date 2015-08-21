@@ -46,15 +46,14 @@ char uuidvalue_wcd[] = "uuid:00000000-0000-0000-0000-000000000000";
 char serialnumber[SERIALNUMBER_MAX_LEN] = "00000000";
 
 char modelnumber[MODELNUMBER_MAX_LEN] = "1";
-char friendly_name[FRIENDLYNAME_MAX_LEN] = "ASUS Router";
 
 /* presentation url :
  * http://nnn.nnn.nnn.nnn:ppppp/  => max 30 bytes including terminating 0 */
 char presentationurl[PRESENTATIONURL_MAX_LEN];
 
 #ifdef ENABLE_MANUFACTURER_INFO_CONFIGURATION
-///* friendly name for root devices in XML description */
-//char friendly_name[FRIENDLY_NAME_MAX_LEN] = OS_NAME " router";
+/* friendly name for root devices in XML description */
+char friendly_name[FRIENDLY_NAME_MAX_LEN] = ROOTDEV_FRIENDLYNAME;
 
 /* manufacturer name for root devices in XML description */
 char manufacturer_name[MANUFACTURER_NAME_MAX_LEN] = ROOTDEV_MANUFACTURER;

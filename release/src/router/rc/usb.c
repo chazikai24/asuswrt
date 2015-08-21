@@ -1352,13 +1352,13 @@ done:
 						// there's some problem with fsck.ext4.
 						&& strcmp(type, "ext4")
 						){
-					cprintf("asusware: umount partition %s...\n", dev_name);
+					cprintf("%s: umount partition %s...\n", apps_folder, dev_name);
 					logmessage("asusware", "umount partition %s...\n", dev_name);
 					diskmon_status(DISKMON_UMOUNT);
 
 					findmntents(dev_name, 0, umount_mountpoint, EFH_HP_REMOVE);
 
-					cprintf("asusware: Automatically scan partition %s...\n", dev_name);
+					cprintf("%s: Automatically scan partition %s...\n", apps_folder, dev_name);
 					logmessage("asusware", "Automatically scan partition %s...\n", dev_name);
 					diskmon_status(DISKMON_SCAN);
 
@@ -1366,13 +1366,13 @@ done:
 					sprintf(command, "app_fsck.sh %s %s", type, dev_name);
 					system(command);
 
-					cprintf("asusware: re-mount partition %s...\n", dev_name);
+					cprintf("%s: re-mount partition %s...\n", apps_folder, dev_name);
 					logmessage("asusware", "re-mount partition %s...\n", dev_name);
 					diskmon_status(DISKMON_REMOUNT);
 
 					ret = mount_r(dev_name, mountpoint, type);
 
-					cprintf("asusware: done.\n");
+					cprintf("%s: done.\n", apps_folder);
 					logmessage("asusware", "done.\n");
 					diskmon_status(DISKMON_FINISH);
 				}
@@ -2748,7 +2748,7 @@ void start_webdav(void)	// added by Vanic
 	system("sh /opt/etc/init.d/S50aicloud scan");
 #else
 */
-	if(nvram_get_int("sw_mode") != SW_MODE_ROUTER) return;
+	//if(nvram_get_int("sw_mode") != SW_MODE_ROUTER) return;
 
 	if (nvram_get_int("webdav_aidisk") || nvram_get_int("webdav_proxy"))
 		nvram_set("enable_webdav", "1");
@@ -2760,6 +2760,11 @@ void start_webdav(void)	// added by Vanic
 	}
 
 	if (nvram_match("enable_webdav", "0")) return;
+
+#ifdef RTCONFIG_TUNNEL
+	//- start tunnel
+	start_mastiff();
+#endif
 
 #ifndef RTCONFIG_WEBDAV
 	if(f_exists("/opt/etc/init.d/S50aicloud"))
@@ -2827,6 +2832,12 @@ void stop_webdav(void)
 
 	logmessage("WEBDAV Server", "daemon is stoped");
 #endif
+
+#ifdef RTCONFIG_TUNNEL
+        //- stop tunnel
+        stop_mastiff();
+#endif
+
 }
 //#endif	// RTCONFIG_WEBDAV
 

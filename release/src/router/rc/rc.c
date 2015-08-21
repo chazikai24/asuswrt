@@ -187,6 +187,12 @@ static int rctest_main(int argc, char *argv[])
 				start_webdav();
 		}
 #endif
+#ifdef RTCONFIG_TUNNEL
+		else if (strcmp(argv[1], "mastiff") == 0) {
+			if(on)
+				start_mastiff();
+		}
+#endif
 		else if (strcmp(argv[1], "gpiow") == 0) {
 			if(argc>=4) set_gpio(atoi(argv[2]), atoi(argv[3]));
 		}
@@ -337,8 +343,16 @@ static const applets_t applets[] = {
 	{ "delay_exec",			delay_main			},
 
 	{ "wanduck",			wanduck_main			},
+#ifdef RTCONFIG_DUALWAN
+#ifdef CONFIG_BCMWL5
+	{ "dualwan",			dualwan_control			},
+#endif
+#endif
 	{ "tcpcheck",			tcpcheck_main			},
 	{ "autodet", 			autodet_main			},
+#ifdef RTCONFIG_QCA_PLC_UTILS
+	{ "autodet_plc", 		autodet_plc_main		},
+#endif
 #ifdef RTCONFIG_CIFS
 	{ "mount-cifs",			mount_cifs_main			},
 #endif
@@ -375,6 +389,9 @@ static const applets_t applets[] = {
 #endif
 #if defined(RTCONFIG_USER_LOW_RSSI) && defined(RTCONFIG_BCMARM)
 	{ "roamast",			roam_assistant_main		},
+#endif
+#ifdef RTCONFIG_DHCP_OVERRIDE
+	{ "detectWAN_arp",		detectWAN_arp_main		},
 #endif
 	{NULL, NULL}
 };
@@ -705,6 +722,12 @@ int main(int argc, char **argv)
 	}
 #endif
 #endif
+#ifdef CONFIG_BCMWL5
+	else if(!strcmp(base, "set_factory_mode")) {
+		set_factory_mode();
+		return 0;
+	}
+#endif
 	else if(!strcmp(base, "run_telnetd")) {
 		run_telnetd();
 		return 0;
@@ -750,6 +773,13 @@ int main(int argc, char **argv)
 	}
 	else if (!strcmp(base, "restart_qtn")){
 		return reset_qtn(0);
+	}
+#endif
+#endif
+#ifdef RTCONFIG_DUALWAN
+#ifdef CONFIG_BCMWL5
+	else if (!strcmp(base, "dualwan")){
+		dualwan_control();
 	}
 #endif
 #endif
@@ -871,18 +901,6 @@ int main(int argc, char **argv)
 		return 0;
 	}
 #ifdef RTCONFIG_USB_MODEM
-	else if(!strcmp(base, "start_udhcpc")) {
-		pid_t pid;
-
-		if(argc != 3){
-			printf("Usage: %s <wan_ifname> <wan_unit>\n", base);
-			return 0;
-		}
-
-		start_udhcpc(argv[1], atoi(argv[2]), &pid);
-
-		return 0;
-	}
 	else if(!strcmp(base, "write_3g_ppp_conf")){
 		return write_3g_ppp_conf();
 	}
@@ -917,16 +935,6 @@ int main(int argc, char **argv)
 	}
 #endif
 #endif
-#if defined(RTCONFIG_IPV6) && defined(RTCONFIG_WIDEDHCP6)
-	else if(!strcmp(base, "stop_ipv6")) {
-		stop_ipv6();
-		return 0;
-	}
-	else if(!strcmp(base, "start_dhcp6c")) {
-		start_dhcp6c();
-		return 0;
-	}
-#endif /* RTCONFIG_WIDEDHCP6 */
 #ifdef RTCONFIG_TOR
 	else if (!strcmp(base, "start_tor")) {
 		start_Tor_proxy();

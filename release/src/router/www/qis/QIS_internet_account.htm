@@ -129,7 +129,7 @@ function submitForm(o, s){
 		document.form.x_Setting.value = '<% nvram_get("x_Setting"); %>';		
 		document.form.sw_mode.value = parent.document.QKform.sw_mode.value;
 		
-		if(parent.isManual)
+		if(parent.flag_manual)
 			document.form.flag.value = "manual";
 		else
 			document.form.flag.value = "verify_detect";
@@ -152,24 +152,37 @@ function submitForm(o, s){
 		document.form.switch_wan2prio.value = parent.document.QKform.switch_wan2prio.value;
 		document.form.switch_stb_x.value = parent.document.QKform.switch_stb_x.value;
 		if(original_switch_wantag != document.form.switch_wantag.value){
-				document.form.action_script.value	= "reboot";
-				document.form.action_wait.value	= eval("<% get_default_reboot_time(); %> + 10");
-				document.getElementById("loadHint").style.display = "";
-				document.getElementById("nextButton").style.display = "none";
-				document.getElementById("prevButton").style.display = "none";
+			/*
+			document.form.action_script.value	= "reboot";
+			document.form.action_wait.value	= eval("<% get_default_reboot_time(); %> + 10");
+			document.getElementById("loadHint").style.display = "";
+			document.getElementById("nextButton").style.display = "none";
+			document.getElementById("prevButton").style.display = "none";
+			*/
+			var reboot_time = eval("<% get_default_reboot_time(); %> + 10");
+			document.form.action_script.value = "saveNvram";
+			document.form.action_wait.value = "0";
+			parent.sysReboot = true;
+			
+			if(reboot_time > parent.rebootTime)
+				parent.rebootTime = reboot_time;
 		}
 
 		document.getElementById("x_Setting").disabled = false;
 		document.form.x_Setting.value = '<% nvram_get("x_Setting"); %>';
 		document.form.sw_mode.value = parent.document.QKform.sw_mode.value;
 
-		if(parent.isManual)
+		if(parent.flag_manual)
 			document.form.flag.value = "manual";
 		else
 			document.form.flag.value = "verify_detect";
 
 		document.form.next_page.value = "/QIS_wizard.htm";
 		document.form.submit();
+		if(original_switch_wantag != document.form.switch_wantag.value)
+			setTimeout(function(){
+				location.href = "/qis/QIS_wireless.htm";
+			}, 500);
 	}
 	else if(document.form.wan_proto.value == 'pptp'|| document.form.wan_proto.value == 'l2tp'){
 		document.form.next_page.value = "QIS_internet_ip.htm";

@@ -24,11 +24,10 @@ char uuidvalue_wan[] = "uuid:12345678-0000-0000-0000-000000abcd02";
 char uuidvalue_wcd[] = "uuid:12345678-0000-0000-0000-000000abcd03";
 char serialnumber[] = "12345678";
 char modelnumber[] = "1";
-char friendly_name[] = "ASUS Router";
 char presentationurl[] = "http://192.168.0.1:8080/";
 /*char presentationurl[] = "";*/
 #ifdef ENABLE_MANUFACTURER_INFO_CONFIGURATION
-//char friendly_name[] = OS_NAME " router";
+char friendly_name[] = ROOTDEV_FRIENDLYNAME;
 char manufacturer_name[] = ROOTDEV_MANUFACTURER;
 char manufacturer_url[] = ROOTDEV_MANUFACTURERURL;
 char model_name[] = ROOTDEV_MODELNAME;

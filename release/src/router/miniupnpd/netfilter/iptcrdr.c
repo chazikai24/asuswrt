@@ -1,4 +1,4 @@
-/* $Id: iptcrdr.c,v 1.54 2015/03/09 10:02:54 nanard Exp $ */
+/* $Id: iptcrdr.c,v 1.53 2015/02/08 09:10:00 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2015 Thomas Bernard
@@ -13,14 +13,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <dlfcn.h>
-#include <linux/version.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 #include <iptables.h>
-#else
-#include <xtables.h>
-#endif
 #include <linux/netfilter/xt_DSCP.h>
 #include <libiptc/libiptc.h>
+
+#include <linux/version.h>
 
 #if IPTABLES_143
 /* IPTABLES API version >= 1.4.3 */
@@ -33,7 +30,7 @@
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
 #define LIST_POISON2  ((void *) 0x00200200 )
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+#if 0
 #include <linux/netfilter/nf_nat.h>
 #else
 #include "tiny_nf_nat.h"
@@ -46,11 +43,13 @@
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 #include <linux/netfilter_ipv4/ip_nat.h>
 #else
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+#if 0
 #include <linux/netfilter/nf_nat.h>
 #else
 #include "tiny_nf_nat.h"
 #endif
+#define ip_nat_multi_range	nf_nat_multi_range
+#define ip_nat_range		nf_nat_range
 #endif
 #define IPTC_HANDLE		iptc_handle_t
 #endif

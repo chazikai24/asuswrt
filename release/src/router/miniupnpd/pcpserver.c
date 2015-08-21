@@ -1,4 +1,4 @@
-/* $Id: pcpserver.c,v 1.38 2014/10/27 16:35:13 nanard Exp $ */
+/* $Id: pcpserver.c,v 1.39 2015/06/22 07:28:21 nanard Exp $ */
 /* MiniUPnP project
  * Website : http://miniupnp.free.fr/
  * Author : Peter Tatrai
@@ -533,7 +533,7 @@ static int parsePCPOption(void* pcp_buf, int remain, pcp_info_t *pcp_msg_info)
 #endif
 		opt_flp = (pcp_flow_priority_option_t*)pcp_buf;
 
-		if ( option_length != sizeof (*flp) ) {
+		if ( option_length != sizeof (*opt_flp) ) {
 			syslog(LOG_ERR, "PCP: Error processing DSCP. sizeof %d and remaining %d . flow len %d \n",
 			       (int)sizeof(pcp_flow_priority_option_t), remain, opt_flp->len);
 			pcp_msg_info->result_code = PCP_ERR_MALFORMED_OPTION;
@@ -770,7 +770,7 @@ static int CreatePCPPeer_NAT(pcp_info_t *pcp_msg_info)
 			       pcp_msg_info->peer_port,
 			       pcp_msg_info->desc);
 			pcp_msg_info->result_code = PCP_ERR_NO_RESOURCES;
-			return;
+			return PCP_ERR_NO_RESOURCES;
 		}
 	}
 #endif
@@ -894,7 +894,7 @@ static void DeletePCPPeer(pcp_info_t *pcp_msg_info)
 			if(r<0) {
 				syslog(LOG_ERR, "PCP PEER: failed to remove peer mapping");
 			} else {
-				syslog(LOG_INFO, "PCP PEER: %s port %hu peer mapping removed",
+				syslog(LOG_DEBUG, "PCP PEER: %s port %hu peer mapping removed",
 				       proto2==IPPROTO_TCP?"TCP":"UDP", eport2);
 			}
 			return;
@@ -1126,7 +1126,7 @@ static void DeletePCPMap(pcp_info_t *pcp_msg_info)
 			break;
 		}
 	if (r >= 0) {
-		syslog(LOG_INFO, "PCP: %s port %hu mapping removed",
+		syslog(LOG_DEBUG, "PCP: %s port %hu mapping removed",
 		       proto2==IPPROTO_TCP?"TCP":"UDP", eport2);
 	} else {
 		syslog(LOG_ERR, "Failed to remove PCP mapping internal port %hu, protocol %s",
@@ -1580,7 +1580,7 @@ int ProcessIncomingPCPPacket(int s, unsigned char *buff, int len,
 	if (!GETFLAG(PCP_ALLOWTHIRDPARTYMASK)) {
 		lan_addr = get_lan_for_peer(senderaddr);
 		if(lan_addr == NULL) {
-			syslog(LOG_WARNING, "PCP packet sender %s not from a LAN, ignoring",
+			syslog(LOG_INFO, "PCP packet sender %s not from a LAN, ignoring",
 			       addr_str);
 			return 0;
 		}

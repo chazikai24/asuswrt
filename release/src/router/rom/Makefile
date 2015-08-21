@@ -140,7 +140,7 @@ endif
 
 ifeq ($(RTAC68U),y)
 	mkdir -p $(INSTALLDIR)/rom/cfe
-	cp -rf cfe/cfe_tmo_2.1.2.5.bin $(INSTALLDIR)/rom/cfe/
+	cp -rf cfe/cfe_tmo_2.1.2.6.bin $(INSTALLDIR)/rom/cfe/
 	cp -rf cfe/cfe_1.0.2.0.bin $(INSTALLDIR)/rom/cfe
 	cp -rf cfe/cfe_1.0.2.0_esmt.bin $(INSTALLDIR)/rom/cfe
 	cp -rf cfe/mtd-write $(INSTALLDIR)/rom/cfe/
@@ -148,26 +148,11 @@ endif
 
 ifeq ($(RTCONFIG_MEDIA_SERVER),y)
 	mkdir -p $(INSTALLDIR)/rom/dlna
-ifeq ($(RTAC3200),y)
-	cp -rf dlna/icon_sm.rtac3200.jpg $(INSTALLDIR)/rom/dlna/icon_sm.jpg
-	cp -rf dlna/icon_sm.rtac3200.png $(INSTALLDIR)/rom/dlna/icon_sm.png
-	cp -rf dlna/icon_lrg.rtac3200.jpg $(INSTALLDIR)/rom/dlna/icon_lrg.jpg
-	cp -rf dlna/icon_lrg.rtac3200.png $(INSTALLDIR)/rom/dlna/icon_lrg.png
-else ifeq ($(RTAC56U), y)
-	cp -rf dlna/icon_sm.rtac56u.jpg $(INSTALLDIR)/rom/dlna/icon_sm.jpg
-	cp -rf dlna/icon_sm.rtac56u.png $(INSTALLDIR)/rom/dlna/icon_sm.png
-	cp -rf dlna/icon_lrg.rtac56u.jpg $(INSTALLDIR)/rom/dlna/icon_lrg.jpg
-	cp -rf dlna/icon_lrg.rtac56u.png $(INSTALLDIR)/rom/dlna/icon_lrg.png
-else ifeq ($(RTAC87U), y)
-	cp -rf dlna/icon_sm.rtac87u.jpg $(INSTALLDIR)/rom/dlna/icon_sm.jpg
-	cp -rf dlna/icon_sm.rtac87u.png $(INSTALLDIR)/rom/dlna/icon_sm.png
-	cp -rf dlna/icon_lrg.rtac87u.jpg $(INSTALLDIR)/rom/dlna/icon_lrg.jpg
-	cp -rf dlna/icon_lrg.rtac87u.png $(INSTALLDIR)/rom/dlna/icon_lrg.png
-else ifeq ($(RTAC68U)$(DSLAC68U)$(RT4GAC55U),y)
-	cp -rf dlna/icon_sm.rtac68u.jpg $(INSTALLDIR)/rom/dlna/icon_sm.jpg
-	cp -rf dlna/icon_sm.rtac68u.png $(INSTALLDIR)/rom/dlna/icon_sm.png
-	cp -rf dlna/icon_lrg.rtac68u.jpg $(INSTALLDIR)/rom/dlna/icon_lrg.jpg
-	cp -rf dlna/icon_lrg.rtac68u.png $(INSTALLDIR)/rom/dlna/icon_lrg.png
+ifeq ($(DSLAC68U)$(RT4GAC55U),y)
+	cp -rf dlna/icon_sm.rt-ac68u.jpg $(INSTALLDIR)/rom/dlna/icon_sm.jpg
+	cp -rf dlna/icon_sm.rt-ac68u.png $(INSTALLDIR)/rom/dlna/icon_sm.png
+	cp -rf dlna/icon_lrg.rt-ac68u.jpg $(INSTALLDIR)/rom/dlna/icon_lrg.jpg
+	cp -rf dlna/icon_lrg.rt-ac68u.png $(INSTALLDIR)/rom/dlna/icon_lrg.png
 else
 ifeq ($(and $(LJPG),$(SJPG),$(LPNG),$(SPNG)),)
 	$(warning Add media server icon for $(BUILD_NAME) !!!!!!!!!!!!)

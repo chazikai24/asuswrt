@@ -156,7 +156,7 @@ function add_pvc() {
 	document.form.dsl_pcr.value="0";
 	document.form.dsl_scr.value="0";
 	document.form.dsl_mbs.value="0";
-	if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {
+	if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {      //MODELDEP: DSL-AC68U,DSL-AC68R
 		document.form.dsl_dot1q.value="0";
 		document.form.dsl_vid.value="";
 		document.form.dsl_dot1p.value="";
@@ -699,7 +699,7 @@ function enable_all_ctrl() {
 	document.getElementById("t2BC").style.display = "";
 	document.getElementById("vpn_server").style.display = "";
 	document.getElementById("btn_apply").style.display = "";
-	if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {
+	if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {	//MODELDEP: DSL-AC68U,DSL-AC68R
 		document.getElementById("dot1q_setting").style.display = "";
 	}
 }
@@ -811,7 +811,7 @@ function fixed_change_dsl_type(dsl_type){
 		showhide("IPsetting",1);
 		showhide("DNSsetting",1);
 		showhide("vpn_server",1);
-		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {
+		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {	//MODELDEP: DSL-AC68U,DSL-AC68R
 			if(dsl_type == "pppoe")
 				showhide("dot1q_setting",1);
 			else
@@ -833,7 +833,7 @@ function fixed_change_dsl_type(dsl_type){
 		showhide("IPsetting",1);
 		showhide("DNSsetting",1);
 		showhide("vpn_server",1);
-		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {
+		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {      //MODELDEP: DSL-AC68U,DSL-AC68R
 			showhide("dot1q_setting",0);
 		}
 	}
@@ -851,7 +851,7 @@ function fixed_change_dsl_type(dsl_type){
 		showhide("IPsetting",1);
 		showhide("DNSsetting",1);
 		showhide("vpn_server",1);
-		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {
+		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {      //MODELDEP: DSL-AC68U,DSL-AC68R
 			showhide("dot1q_setting",1);
 		}
 	}
@@ -873,7 +873,7 @@ function fixed_change_dsl_type(dsl_type){
 		showhide("IPsetting",0);
 		showhide("DNSsetting",0);
 		showhide("vpn_server",0);
-		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {
+		if(productid == "DSL-AC68U" || productid == "DSL-AC68R") {      //MODELDEP: DSL-AC68U,DSL-AC68R
 			showhide("dot1q_setting",1);
 		}
 	}

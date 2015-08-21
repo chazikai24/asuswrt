@@ -1,4 +1,4 @@
-/* $Id: options.c,v 1.32 2014/05/22 07:52:45 nanard Exp $ */
+/* $Id: options.c,v 1.28 2013/12/13 14:07:08 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * author: Ryan Wagoner
@@ -56,7 +56,6 @@ static const struct {
 	{ UPNPUUID, "uuid"},
 	{ UPNPSERIAL, "serial"},
 	{ UPNPMODEL_NUMBER, "model_number"},
-	{ UPNPFRIENDLYNAME, "friendly_name"},
 	{ UPNPCLEANTHRESHOLD, "clean_ruleset_threshold"},
 	{ UPNPCLEANINTERVAL, "clean_ruleset_interval"},
 #ifdef USE_NETFILTER

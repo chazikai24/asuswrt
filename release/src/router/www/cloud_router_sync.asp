@@ -20,6 +20,7 @@
 <script type="text/javascript" src="/switcherplugin/jquery.iphone-switch.js"></script>
 <script type="text/javascript" src="/disk_functions.js"></script>
 <script language="JavaScript" type="text/javascript" src="/md5.js"></script>
+<script language="JavaScript" type="text/javascript" src="/form.js"></script>
 <style type="text/css">
 /* folder tree */
 .mask_bg{
@@ -143,7 +144,14 @@ var lastClickedObj = 0;
 var _layer_order = "";
 var isNotIE = (navigator.userAgent.search("MSIE") == -1); 
 var PROTOCOL = "cifs";
-//window.onresize = cal_panel_block;
+window.onresize = function() {
+	if(document.getElementById("folderTree_panel").style.display == "block") {
+		cal_panel_block("folderTree_panel", 0.25);
+	}
+	if(document.getElementById("invitation_block").style.display == "block") {
+		cal_panel_block("invitation_block", 0.25);
+	}
+} 
 //var router_sync = '<% nvram_show_chinese_char("share_link_host"); %>';
 var router_sync =decodeURIComponent('<% nvram_char_to_ascii("","share_link_host"); %>');
 var router_synclist = '';
@@ -356,7 +364,7 @@ function get_disk_tree(){
 		alert('<#no_usb_found#>');
 		return false;	
 	}
-	cal_panel_block('folderTree_panel');
+	cal_panel_block("folderTree_panel", 0.25);
 	$("#folderTree_panel").fadeIn(300);
 	get_layer_items("0");
 }
@@ -650,33 +658,10 @@ function confirm_folderTree(){
 	$("#folderTree_panel").fadeOut(300);
 }
 
-function cal_panel_block(obj_id){
-	var blockmarginLeft;
-	if (window.innerWidth)
-		winWidth = window.innerWidth;
-	else if ((document.body) && (document.body.clientWidth))
-		winWidth = document.body.clientWidth;
-		
-	if (document.documentElement  && document.documentElement.clientHeight && document.documentElement.clientWidth){
-		winWidth = document.documentElement.clientWidth;
-	}
-
-	if(winWidth >1050){	
-		winPadding = (winWidth-1050)/2;	
-		winWidth = 1105;
-		blockmarginLeft= (winWidth*0.25)+winPadding;
-	}
-	else if(winWidth <=1050){
-		blockmarginLeft= (winWidth)*0.25+document.body.scrollLeft;	
-
-	}
-	//document.getElementById("folderTree_panel").style.marginLeft = blockmarginLeft+"px";
-	document.getElementById(obj_id).style.marginLeft = blockmarginLeft+"px";
-}
 function show_invitation(share_link_url){
 	var invite_content = "";
 	var sync_rule_desc = "";
-	document.getElementById('invite_desc').innerHTML = "Sync description: "+document.form.router_sync_desc.value;
+	document.getElementById('invite_desc').innerHTML = "<#sync_router_Invit_desc2#>: "+document.form.router_sync_desc.value;	/*Sync description*/
 	document.getElementById('invite_path').innerHTML = document.form.cloud_dir.value;
 	if(document.form.router_sync_rule.value == 0)
 		sync_rule_desc = "Two way sync";
@@ -685,18 +670,18 @@ function show_invitation(share_link_url){
 	else
 		sync_rule_desc = "Client to host";
 		
-	document.getElementById('invite_rule').innerHTML = "Sync rule: "+sync_rule_desc;
+	document.getElementById('invite_rule').innerHTML = "<#sync_router_Invit_desc4#>: "+sync_rule_desc;	/*Sync rule*/
 	//document.getElementById('invite_share').innerHTML = url_name + "/" +share_link_url;
 	document.getElementById('invite_share').innerHTML = "http://"+ theUrl +"/" + share_link_url;
 	document.getElementById("mailto").innerHTML = appendMailTo();
 	
-	cal_panel_block('invitation_block');
+	cal_panel_block("invitation_block", 0.25);
 }
 
 function show_captcha_style(captcha){		// captcha display style
 	if( document.getElementById('captcha_rule').value == 2){  
 		var graph_content = "";
-		graph_content = "Security code: ";
+		graph_content = "<#routerSync_Security_code#>: ";
 		for(i=0;i<4;i++){
 			graph_content += '<img style="height:30px;" src="/images/cloudsync/captcha/'+captcha.charAt(i)+'.jpg">';
 		}
@@ -704,9 +689,9 @@ function show_captcha_style(captcha){		// captcha display style
 		document.getElementById('invite_captcha').innerHTML = graph_content;
 	}
 	else if( document.getElementById('captcha_rule').value == 0)
-		document.getElementById('invite_captcha').innerHTML = "Security code: None";
+		document.getElementById('invite_captcha').innerHTML = "<#routerSync_Security_code#>: None";
 	else
-		document.getElementById('invite_captcha').innerHTML = "Security code: "+captcha;
+		document.getElementById('invite_captcha').innerHTML = "<#routerSync_Security_code#>: "+captcha;
 }
 
 function close_invitation_block(){	
@@ -891,7 +876,7 @@ function show_view_info(obj_id){
 	share_link_hashed = f23.s52e(hash_url);
 
 	//document.getElementById('invite_desc').innerHTML = "Sync description: "+document.form.router_sync_desc.value;
-	document.getElementById('invite_desc').innerHTML = "Sync description: "+router_synclist_desc[j];
+	document.getElementById('invite_desc').innerHTML = "<#sync_router_Invit_desc2#>: "+router_synclist_desc[j];	/*Sync description*/
 	//document.getElementById('invite_path').innerHTML = document.form.cloud_dir.value;	
 	document.getElementById('invite_path').innerHTML = router_synclist_localfolder[j];	
 	if(router_synclist_rule[j] == 0)
@@ -901,12 +886,12 @@ function show_view_info(obj_id){
 	else
 		sync_rule_desc = "Client to host";	
 	
-	document.getElementById('invite_rule').innerHTML = "Sync rule: "+sync_rule_desc;
+	document.getElementById('invite_rule').innerHTML = "<#sync_router_Invit_desc4#>: "+sync_rule_desc;	/*Sync rule*/
 	document.getElementById('invite_share').innerHTML = "http://"+ theUrl +"/"+share_link_hashed;	
-	document.getElementById('invite_captcha').innerHTML = "Security code: "+ router_synclist_captcha[j];
+	document.getElementById('invite_captcha').innerHTML = "<#routerSync_Security_code#>: "+ router_synclist_captcha[j];
 	document.getElementById('invite_captcha').innerHTML += "<br><br>We strongly suggest you giving this code separately to your friends.";
 	document.getElementById("mailto").innerHTML = appendMailTo();
-	cal_panel_block('invitation_block'); 
+	cal_panel_block("invitation_block", 0.25);
 	$('#invitation_block').fadeIn(300);
 }
 
@@ -918,10 +903,10 @@ function appendMailTo(){
 	mailtoCode += document.getElementById('invite_desc').innerHTML.replace(/ /g, "%20") + "%0D%0A"; 
 	mailtoCode += "Sync%20path:%20" + document.getElementById('invite_path').innerHTML.replace(/ /g, "%20") + "%0D%0A"; 
 	mailtoCode += document.getElementById('invite_rule').innerHTML.replace(/ /g, "%20") + "%0D%0A%0D%0A"; 
-	mailtoCode += "Please connect your device to ASUS router through WiFi or ethernet and click the link below to reconfirm this invitation.%0D%0A".replace(/ /g, "%20");
+	mailtoCode += "<#sync_router_Invit_desc5#>%0D%0A".replace(/ /g, "%20");
 	mailtoCode += document.getElementById('invite_share').innerHTML.replace(/ /g, "%20") + "%0D%0A"; 
 	// mailtoCode += document.getElementById('invite_captcha').innerHTML; 
-	mailtoCode += '"><div onmouseover="" style="margin-right:15px;background-image:url(images/cloudsync/mail_send.png);background-repeat:no-repeat;width:64px;height:64px;"></div><div style="font-size:12px;margin-top:3px;margin-right:17px;">Send mail</div></a>';
+	mailtoCode += '"><div onmouseover="" style="margin-right:15px;background-image:url(images/cloudsync/mail_send.png);background-repeat:no-repeat;width:64px;height:64px;"></div><div style="font-size:12px;margin-top:3px;margin-right:17px;"><#Send_mail#></div></a>';
 	return mailtoCode;
 }
 
@@ -1056,19 +1041,19 @@ function checkDDNSReturnCode(){
 <!--div id="DM_mask" class="mask_bg"></div-->
 <div id="invitation_block" class="panel_folder" >
 	<table><tr><td>
-		<div class="machineName" style="width:200px;font-family:Microsoft JhengHei;font-size:12pt;font-weight:bolder; margin-top:20px;margin-left:30px;">Invitation</div>
+		<div class="machineName" style="width:200px;font-family:Microsoft JhengHei;font-size:12pt;font-weight:bolder; margin-top:20px;margin-left:30px;"><#Invitation#></div>
 	</td></tr></table>
 	<div style="overflow:auto;margin-top:0px;height:311px;padding:10px;width:485px;">
 		<table style="margin-left:20px;word-break:break-all;word-wrap:break-word;">
 			<tr >
 				<td>
-					<div>Hi, lets share our files with smart sync!</div>				
+					<div><#sync_router_Invit_desc1#><!--Hi, lets share our files with Smart Sync! --></div>
 				</td>
 			</tr>
 			<tr>
 				<td>
 					<div id="invite_desc" style="margin-top:10px;width:440px;"></div>
-					<div>Sync path:
+					<div><#sync_router_Invit_desc3#>:	<!-- Sync path -->
 						<span id="invite_path" style="text-decoration:underline;width:440px;"></span>
 					</div>
 					<div id="invite_rule"></div>
@@ -1076,7 +1061,7 @@ function checkDDNSReturnCode(){
 			</tr>
 			<tr>
 				<td>
-					<div style="margin-top:10px;width:440px;">Please connect your device to ASUS router through WiFi or ethernet and click the link below to reconfirm this invitation.</div>
+					<div style="margin-top:10px;width:440px;"><#sync_router_Invit_desc5#></div>	<!-- Please connect your device to ASUS router through WiFi or ethernet and click the link below to reconfirm this invitation. -->
 				</td>
 			</tr>
 			<tr>
@@ -1095,7 +1080,7 @@ function checkDDNSReturnCode(){
 		</table>
 	</div>
 	<div style="background-image:url(images/Tree/bg_02.png);background-repeat:no-repeat;height:90px;">		
-		<input class="button_gen" type="button"  onclick="close_invitation_block();" value="Close" style="margin-top:15px;margin-left:200px">
+		<input class="button_gen" type="button"  onclick="close_invitation_block();" value="<#CTL_close#>" style="margin-top:15px;margin-left:200px">
 	</div>
 </div>
 <div id="DM_mask_floder" class="mask_floder_bg"></div>

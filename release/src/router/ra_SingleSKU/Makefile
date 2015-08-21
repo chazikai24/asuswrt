@@ -59,6 +59,12 @@ endif
 ifneq ($(SKU_5G_NCC),)
 	@install $(BUILD_NAME)/$(SKU_5G_NCC) $(SKUDIR)/SingleSKU_5G_NCC.dat
 endif
+ifneq ($(SKU_2G_NCC2),)
+	@install $(BUILD_NAME)/$(SKU_2G_NCC2) $(SKUDIR)/SingleSKU_NCC2.dat
+endif
+ifneq ($(SKU_5G_NCC2),)
+	@install $(BUILD_NAME)/$(SKU_5G_NCC2) $(SKUDIR)/SingleSKU_5G_NCC2.dat
+endif
 ifneq ($(SKU_2G_JP),)
 	@install $(BUILD_NAME)/$(SKU_2G_JP) $(SKUDIR)/SingleSKU_JP.dat
 endif

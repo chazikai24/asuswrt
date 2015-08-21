@@ -1,4 +1,4 @@
-/* $Id: upnpglobalvars.h,v 1.41 2014/05/22 07:51:08 nanard Exp $ */
+/* $Id: upnpglobalvars.h,v 1.38 2014/03/10 11:04:53 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -76,9 +76,6 @@ extern char serialnumber[];
 
 #define MODELNUMBER_MAX_LEN (48)
 extern char modelnumber[];
-
-#define FRIENDLYNAME_MAX_LEN (64)
-extern char friendly_name[];
 
 #define PRESENTATIONURL_MAX_LEN (64)
 extern char presentationurl[];

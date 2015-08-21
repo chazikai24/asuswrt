@@ -1,6 +1,9 @@
-log_lineState="<% nvram_get("dsltmp_adslsyncsts"); %>";
+uptimeStr = "<% uptime(); %>";
+boottime = parseInt(uptimeStr.substring(32,42));
+sync_status_update = "<% nvram_get("dsltmp_adslsyncsts"); %>";
+adsl_timestamp_update = parseInt("<% nvram_get("adsl_timestamp"); %>");
 log_Opmode="<% nvram_get("dsllog_opmode"); %>";
-log_AdslType="<% nvram_get("dsllog_adsltype"); %>";
+log_AdslType="<% nvram_get("dsllog_adsltype"); %>".replace("_", " ");
 log_SNRMarginDown="<% nvram_get("dsllog_snrmargindown"); %>";
 log_SNRMarginUp="<% nvram_get("dsllog_snrmarginup"); %>";
 log_AttenDown="<% nvram_get("dsllog_attendown"); %>";

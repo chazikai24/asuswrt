@@ -3,7 +3,7 @@ include ../common.mak
 ASUSWRTTOOLSDIR = $(SRCBASE)/router/tools/Lnx_AsusWrtDictPrep
 ASUSWRTTOOLSDIR2 = $(SRCBASE)/router/tools/Lnx_ToolHelp
 
-MODELS_HAVE_USB3 = "DSL-AC68U RT-AC3200 RT-AC87U RT-AC69U RT-AC68U RT-AC56S RT-AC56U RT-AC55U RT-AC55UHP RT-N18U RT-N65U"
+MODELS_HAVE_USB3 = "DSL-AC68U RT-AC3200 RT-AC87U RT-AC69U RT-AC68U RT-AC56S RT-AC56U RT-AC55U RT-AC55UHP RT-N18U RT-N65U RT-AC88U RT-AC3100 RT-AC5300"
 
 all:
 
@@ -377,9 +377,11 @@ ifneq ($(RTCONFIG_OLD_PARENTALCTRL), y)
 endif
 
 ifneq ($(BUILD_NAME),RT-AC3200)
+ifneq ($(BUILD_NAME),RT-AC5300)
 	rm -rf $(INSTALLDIR)/www/Advanced_Smart_Connect.asp
 	rm -rf $(INSTALLDIR)/www/images/New_ui/smart_connect.png
 	rm -rf $(INSTALLDIR)/www/images/New_ui/smart_connect_concept.gif
+endif
 endif
 
 ifneq ($(RTCONFIG_FINDASUS), y)
@@ -397,11 +399,6 @@ endif
 
 ifneq ($(RTCONFIG_TOR), y)
 	rm -rf $(INSTALLDIR)/www/Advanced_TOR_Content.asp
-endif
-
-ifeq ($(filter $(BUILD_NAME), RT-AC55U 4G-AC55U), )
-	rm -rf $(INSTALLDIR)/www/find_device.asp
-	rm -rf $(INSTALLDIR)/www/images/New_ui/wifi-logo.png
 endif
 
 ifneq ($(BUILD_NAME),RT-AC3200)

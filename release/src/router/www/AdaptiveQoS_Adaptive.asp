@@ -185,13 +185,13 @@ function applyRule(){
 									<table width="100%">
 										<tr>
 											<td  class="formfonttitle" align="left">								
-												<div><#Adaptive_QoS#> - <#EzQoS_type_adaptive#></div>
+												<div><#Adaptive_QoS#> - <#Adaptive_QoS#></div>
 											</td>
 											<td align="right">
 												<div>
 													<select onchange="switchPage(this.options[this.selectedIndex].value)" class="input_option">
 														<option value="1" ><#Adaptive_QoS_Conf#></option>
-														<option value="2" selected><#EzQoS_type_adaptive#></option>														
+														<option value="2" selected><#Adaptive_QoS#></option>														
 													</select>	    
 												</div>
 											</td>	

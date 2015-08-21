@@ -30,23 +30,6 @@ var ISP_List_IPTV = [ <% get_isp_list("/www/ISP_List_IPTV.txt"); %> ];
 var ru_idx_start = 0;
 var x_Setting = "<% nvram_get("x_Setting"); %>";
 
-function document.getElementById(){
-	var elements = new Array();
-
-	for(var i = 0; i < arguments.length; ++i){
-		var element = arguments[i];
-	if(typeof element == 'string')
-		element = document.getElementById(element);
-
-		if(arguments.length == 1)
-			return element;
-
-		elements.push(element);
-	}
-
-	return elements;
-}
-
 function setIptvNumPvc() {
 	var pvc_cnt = 0;
 	var tmp = document.form.dsltmp_cfg_iptv_idx.value;
@@ -313,7 +296,7 @@ function gotoPrev(){
 	location.href = "/qis/QIS_admin_pass.htm";
 }
 
-function QIS_menual_setting_load_body() {
+function QIS_manual_setting_load_body() {
 	parent.set_step("t2");
 
 	hidePVCInfo(1);
@@ -473,7 +456,7 @@ function update_dsl_info(){
 </script>
 </head>
 
-<body onLoad="QIS_menual_setting_load_body();" >
+<body onLoad="QIS_manual_setting_load_body();" >
 <form method="post" name="form" action="/start_apply.htm" target="">
 <input type="hidden" name="prev_page" value="">
 <input type="hidden" name="current_page" value="/qis/QIS_manual_setting.htm">
@@ -599,7 +582,7 @@ function update_dsl_info(){
 
 	<div class="apply_gen" style="margin-top:10px">
 		<span id="bottom_btn1"><input type="button" value="<#CTL_Detect_Again#>" tabindex="10" onclick="submit_page();" class="button_gen" ></span>
-		<input type="button" value="<#btn_next#>" tabindex="9" onclick="btnNext();" class="button_gen">
+		<input type="button" value="<#CTL_next#>" tabindex="9" onclick="btnNext();" class="button_gen">
 	</div>
 
 </div>

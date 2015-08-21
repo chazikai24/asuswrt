@@ -265,7 +265,9 @@ static int wlconf(char *ifname, int unit, int subunit)
 #ifdef RTCONFIG_QTN
 GEN_CONF:
 #endif
-
+#ifdef RTCONFIG_BCMWL6
+		wl_check_chanspec();
+#endif
 		generate_wl_para(unit, subunit);
 
 		for (r = 1; r < MAX_NO_MSSID; r++)	// early convert for wlx.y
@@ -369,42 +371,9 @@ GEN_CONF:
 				nvram_match(strcat_r(prefix, "nmode", tmp), "-1"))
 				eval("wl", "-i", ifname, "rtsthresh", "65535");
 #endif
-			if (nvram_match(strcat_r(prefix, "nband", tmp), "1")) {
-#if defined(DSL_AC68U)
-				if (	nvram_match(strcat_r(prefix, "country_code", tmp), "EU") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "13"))
-					eval("wl", "-i", ifname, "radarthrs",
-					"0x6ac", "0x30", "0x6a8", "0x30", "0x6a8", "0x30", "0x6a8", "0x30", "0x6a4", "0x30", "0x6a0", "0x30");
-#endif
-#if defined(RTAC68U)
-				if ((	nvram_match(strcat_r(prefix, "country_code", tmp), "EU") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "13")) ||
-				       (nvram_match(strcat_r(prefix, "country_code", tmp), "JP") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "47")))
-					eval("wl", "-i", ifname, "radarthrs",
-					"0x6ac", "0x30", "0x6a8", "0x30", "0x6a8", "0x30", "0x6a4", "0x30", "0x6a4", "0x30", "0x6a0", "0x30");
-#elif defined(RTAC66U) || defined(RTN66U)
-				if (((get_model() == MODEL_RTAC66U) &&
-					nvram_match(strcat_r(prefix, "country_code", tmp), "EU") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "31") &&
-					nvram_match(strcat_r(prefix, "dfs", tmp), "1")) ||
-					((get_model() == MODEL_RTN66U) &&
-					nvram_match(strcat_r(prefix, "country_code", tmp), "EU") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "0")))
-					eval("wl", "-i", ifname, "radarthrs",
-					"0x6ac", "0x30", "0x6a8", "0x30", "0x6a8", "0x30", "0x6a8", "0x30", "0x6a4", "0x30", "0x6a0", "0x30");
-#endif
-#ifdef RTAC3200
-				if (	nvram_match(strcat_r(prefix, "country_code", tmp), "E0") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "989"))
-					eval("wl", "-i", ifname, "radarthrs",
-					"0x698", "0x30", "0x698", "0x30", "0x68c", "0x30", "0x6d0", "0x30", "0x6d0", "0x30", "0x6c6", "0x30");
-				else if (nvram_match(strcat_r(prefix, "country_code", tmp), "JP") &&
-					nvram_match(strcat_r(prefix, "country_rev", tmp), "999"))
-					eval("wl", "-i", ifname, "radarthrs",
-					"0x690", "0x30", "0x68a", "0x30", "0x68e", "0x30", "0x694", "0x30", "0x693", "0x30", "0x6a8", "0x30");
-#endif
-			}
+
+			wl_dfs_radarthrs_config(ifname, unit);
+
 #endif /* RTCONFIG_BCMWL6 */
 			txpower = nvram_get_int(wl_nvname("txpower", unit, 0));
 
@@ -810,8 +779,12 @@ void wlconf_post(const char *ifname)
 		eval("wl", "-i", ifname, "radioreg", "0x892", "0x5068", "cr0");
 	}
 #endif
-#if defined(RTAC3200) || defined(RTAC5300)
+#if defined(RTAC3200) || (defined(RTCONFIG_BCMWL6) && defined(RTCONFIG_WIRELESSREPEATER))
+#ifdef RTAC3200
 	if (is_psta(unit))
+#else
+	if (is_ure(unit))
+#endif
 		eval("wl", "-i", ifname, "allmulti", "1");
 #endif
 }
@@ -979,11 +952,11 @@ void start_wl(void)
 #endif
 #endif /* CONFIG_BCMWL5 */
 
-#if 0
-#ifdef RTCONFIG_USER_LOW_RSSI
+
+#if defined(RTCONFIG_USER_LOW_RSSI) && !defined(RTCONFIG_BCMARM)
 	init_wllc();
 #endif
-#endif
+
 
 #ifdef RTCONFIG_QTN
 	start_qtn_monitor();
@@ -1231,7 +1204,19 @@ gen_qca_wifi_cfgs(void)
 	}
 #endif
 
+#if defined(PLN12)
+	led_control(LED_2G_GREEN, led_onoff[0]);
+	led_control(LED_2G_ORANGE, led_onoff[0]);
+	led_control(LED_2G_RED, led_onoff[0]);
+	set_wifiled(1);
+#elif defined(PLAC56)
+	led_control(LED_2G_GREEN, led_onoff[0]);
+	led_control(LED_2G_RED, led_onoff[0]);
+	led_control(LED_5G_GREEN, led_onoff[0]);
+	led_control(LED_5G_RED, led_onoff[0]);
+#else
 	led_control(LED_2G, led_onoff[0]);
+#endif
 	led_control(LED_5G, led_onoff[1]);
 }
 
@@ -1618,13 +1603,13 @@ void start_lan(void)
 		(get_model() == MODEL_RTAC5300) ||
 		(get_model() == MODEL_RTAC3100) ||
 		(get_model() == MODEL_RTAC88U)) {
-#ifdef RTCONFIG_BCM7
-#ifdef RTAC3200
+#if defined(RTAC3200) || defined(RTAC68U) || defined(RTAC5300)
 		wl_disband5grp();
 #endif
+#if defined(RTCONFIG_BCM7) || defined(RTCONFIG_BCM_7114)
 		load_wl();
 #else
-		if(!nvram_match("nowl", "1")) modprobe("wl");
+		if (!nvram_match("nowl", "1")) modprobe("wl");
 #endif
 #ifndef RTCONFIG_BCMARM
 #if defined(NAS_GTK_PER_STA) && defined(PROXYARP)
@@ -1633,9 +1618,8 @@ void start_lan(void)
 #endif
 	}
 #endif
-	if(!nvram_match("nowl", "1")) wlconf_pre();
+	wlconf_pre();
 #endif
-	
 
 #if defined(RTCONFIG_RALINK) || defined(RTCONFIG_QCA)
 	init_wl();
@@ -1947,7 +1931,7 @@ void start_lan(void)
 			 	 * to br0 (i.e. via the network GMAC#2).
 			 	 */
 				if (nvram_match("gmac3_enable", "1") &&
-					find_in_list(nvram_get("fwd_wlandevs"), name))
+					find_in_list(nvram_get("fwd_wlandevs"), ifname))
 						goto gmac3_no_swbr;
 #endif
 				if (!match)
@@ -2017,7 +2001,11 @@ gmac3_no_swbr:
 	else
 #endif
 		ifconfig(lan_ifname, IFUP, nvram_safe_get("lan_ipaddr"), nvram_safe_get("lan_netmask"));//*/
+#ifdef RTCONFIG_DHCP_OVERRIDE
+	if(nvram_match("lan_proto", "static") || nvram_get_int("sw_mode") == SW_MODE_AP)
+#else
 	if(nvram_match("lan_proto", "static"))
+#endif
 		ifconfig(lan_ifname, IFUP, nvram_safe_get("lan_ipaddr"), nvram_safe_get("lan_netmask"));
 	else
 		ifconfig(lan_ifname, IFUP, nvram_default_get("lan_ipaddr"), nvram_default_get("lan_netmask"));
@@ -2218,6 +2206,16 @@ void stop_lan(void)
 				while (*ifname == ' ') ++ifname;
 				if (*ifname == 0) break;
 				disable_wifi_bled(ifname);
+#ifdef RTCONFIG_DPSTA
+				if (!strcmp(ifname, "dpsta")) {
+					char dp_uif[80], *dpnext;
+					foreach(dp_uif, nvram_safe_get("dpsta_ifnames"),
+						dpnext) {
+						eval("wlconf", dp_uif, "down");
+						ifconfig(dp_uif, 0, NULL, NULL);
+					}
+				}
+#endif
 #ifdef CONFIG_BCMWL5
 #ifdef RTCONFIG_QTN
 				if (strcmp(ifname, "wifi0"))
@@ -2225,24 +2223,28 @@ void stop_lan(void)
 				{
 					eval("wlconf", ifname, "down");
 					eval("wl", "-i", ifname, "radio", "off");
+					ifconfig(ifname, 0, NULL, NULL);
 				}
 #elif defined RTCONFIG_RALINK
 				if (!strncmp(ifname, "ra", 2))
 					stop_wds_ra(lan_ifname, ifname);
 #elif defined(RTCONFIG_QCA)
 				/* do nothing */
-#endif
+#endif	// BCMWL5
+				
 #ifdef RTCONFIG_GMAC3
 				/* List of primary WLAN interfaces that avail of HW switching. */
 				/* In 3GMAC mode, each wl interfaces in "fwd_wlandevs" don't
 				 * attach to the bridge.
 				 */
-				if(! (nvram_match("gmac3_enable", "1") && find_in_list(nvram_get("fwd_wlandevs"), name)))
+				if (nvram_match("gmac3_enable", "1") &&
+					find_in_list(nvram_get("fwd_wlandevs"), ifname))
+					goto gmac3_no_swbr;
 #endif
-				{
-					eval("brctl", "delif", lan_ifname, ifname);
-					ifconfig(ifname, 0, NULL, NULL);
-				}
+				eval("brctl", "delif", lan_ifname, ifname);
+#ifdef RTCONFIG_GMAC3
+gmac3_no_swbr:
+#endif
 #ifdef RTCONFIG_EMF
 				if (nvram_match("emf_enable", "1"))
 					eval("emf", "del", "iface", lan_ifname, ifname);
@@ -3586,13 +3588,13 @@ void start_lan_wl(void)
 		modprobe("emf");
 		modprobe("igs");
 #endif
-#ifdef RTCONFIG_BCM7
-#ifdef RTAC3200
+#if defined(RTAC3200) || defined(RTAC68U) || defined(RTAC5300)
 		wl_disband5grp();
 #endif
+#if defined(RTCONFIG_BCM7) || defined(RTCONFIG_BCM_7114)
 		load_wl();
 #else
-		modprobe("wl");
+		if (!nvram_match("nowl", "1")) modprobe("wl");
 #endif
 #ifndef RTCONFIG_BCMARM
 #if defined(NAS_GTK_PER_STA) && defined(PROXYARP)
@@ -3939,11 +3941,11 @@ void restart_wl(void)
 #endif
 #endif /* CONFIG_BCMWL5 */
 
-#if 0
-#ifdef RTCONFIG_USER_LOW_RSSI
+
+#if defined(RTCONFIG_USER_LOW_RSSI) && !defined(RTCONFIG_BCMARM)
 	init_wllc();
 #endif
-#endif
+
 
 }
 
@@ -4514,7 +4516,7 @@ int reset_qtn(int restart)
 {
 	int wait_loop;
 	gen_stateless_conf();
-	system("cp /rom/qtn/* /tmp/");
+	system("cp -p /rom/qtn/* /tmp/");
 	if( restart == 0){
 		lanport_ctrl(0);
 #if 1	/* replaced by raw Ethernet frame */

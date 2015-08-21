@@ -1,4 +1,4 @@
-/* $Id: upnpsoap.c,v 1.136 2015/03/07 15:52:30 nanard Exp $ */
+/* $Id: upnpsoap.c,v 1.135 2015/02/10 15:01:24 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2015 Thomas Bernard
@@ -1772,7 +1772,7 @@ DeletePinhole(struct upnphttp * h, const char * action)
 		SoapError(h, 501, "ActionFailed");
 		return;
 	}
-	syslog(LOG_INFO, "%s: (inbound) pinhole with ID %d successfully removed",
+	syslog(LOG_DEBUG, "%s: (inbound) pinhole with ID %d successfully removed",
 	       action, uid);
 	BuildSendAndCloseSoapResp(h, resp, sizeof(resp)-1);
 }

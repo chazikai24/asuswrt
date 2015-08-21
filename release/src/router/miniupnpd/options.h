@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.26 2014/05/22 07:52:45 nanard Exp $ */
+/* $Id: options.h,v 1.21 2012/06/29 19:26:09 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * author: Ryan Wagoner
@@ -42,7 +42,6 @@ enum upnpconfigoptions {
 	UPNPUUID,				/* uuid */
 	UPNPSERIAL,				/* serial */
 	UPNPMODEL_NUMBER,		/* model_number */
-	UPNPFRIENDLYNAME,		/* friendly_name */
 	UPNPCLEANTHRESHOLD,		/* clean_ruleset_threshold */
 	UPNPCLEANINTERVAL,		/* clean_ruleset_interval */
 	UPNPENABLENATPMP,		/* enable_natpmp */

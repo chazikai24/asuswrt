@@ -1,4 +1,4 @@
-/* $Id: minissdp.c,v 1.74 2015/04/30 08:59:51 nanard Exp $ */
+/* $Id: minissdp.c,v 1.73 2015/01/17 11:26:05 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2015 Thomas Bernard
@@ -796,7 +796,7 @@ ProcessSSDPData(int s, const char *bufr, int n,
 	lan_addr = get_lan_for_peer(sender);
 	if(lan_addr == NULL)
 	{
-		syslog(LOG_WARNING, "SSDP packet sender %s not from a LAN, ignoring",
+		syslog(LOG_INFO, "SSDP packet sender %s not from a LAN, ignoring",
 		       sender_str);
 		return;
 	}

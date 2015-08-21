@@ -1,4 +1,4 @@
-/* $Id: upnpdescstrings.h,v 1.9 2013/12/13 12:50:54 nanard Exp $ */
+/* $Id: upnpdescstrings.h,v 1.8 2012/09/27 16:00:10 nanard Exp $ */
 /* miniupnp project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2013 Thomas Bernard
@@ -7,16 +7,24 @@
 #ifndef UPNPDESCSTRINGS_H_INCLUDED
 #define UPNPDESCSTRINGS_H_INCLUDED
 
-#include "version.h"
 #include "config.h"
 
 /* strings used in the root device xml description */
-#define ROOTDEV_FRIENDLYNAME		RT_BUILD_NAME
+#ifdef RT_BUILD_NAME
+#define ROOTDEV_FRIENDLYNAME		"ASUS " RT_BUILD_NAME
 #define ROOTDEV_MANUFACTURER		"ASUSTeK Computer Inc."
 #define ROOTDEV_MANUFACTURERURL		OS_URL
 #define ROOTDEV_MODELNAME		RT_BUILD_NAME
 #define ROOTDEV_MODELDESCRIPTION	RT_BUILD_NAME
 #define ROOTDEV_MODELURL		OS_URL
+#else
+#define ROOTDEV_FRIENDLYNAME		OS_NAME " router"
+#define ROOTDEV_MANUFACTURER		OS_NAME
+#define ROOTDEV_MANUFACTURERURL		OS_URL
+#define ROOTDEV_MODELNAME			OS_NAME " router"
+#define ROOTDEV_MODELDESCRIPTION	OS_NAME " router"
+#define ROOTDEV_MODELURL			OS_URL
+#endif
 
 #define WANDEV_FRIENDLYNAME			"WANDevice"
 #define WANDEV_MANUFACTURER			"MiniUPnP"

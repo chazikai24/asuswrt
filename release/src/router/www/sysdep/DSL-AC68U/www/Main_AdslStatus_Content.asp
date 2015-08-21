@@ -19,9 +19,12 @@
 <script>
 
 var adsl_timestamp = parseInt("<% nvram_get("adsl_timestamp"); %>");
+var sync_status = "<% nvram_get("dsltmp_adslsyncsts"); %>";
+var adsl_timestamp_update = parseInt("<% nvram_get("adsl_timestamp"); %>");
+var sync_status_update = "<% nvram_get("dsltmp_adslsyncsts"); %>";
 var adsl_boottime = boottime - adsl_timestamp;
+var dsl_type = "<% nvram_get("dsllog_adsltype"); %>".replace("_", " ");
 
-var log_lineState = "<% nvram_get("dsltmp_adslsyncsts"); %>";
 var log_Opmode;
 var log_AdslType;
 var log_SNRMarginDown;
@@ -47,14 +50,19 @@ function update_log(){
 			},
  	
 		success: function(){
-				document.getElementById("div_lineState").innerHTML = log_lineState;
+				if(adsl_timestamp_update != "" && sync_status != sync_status_update){
+					adsl_boottime = boottime - adsl_timestamp_update;
+					showadslbootTime();
+				}
+				
+				sync_status = sync_status_update;
+				document.getElementById("div_lineState").innerHTML = sync_status_update;
 				document.getElementById("up_modul").innerHTML = log_Opmode;
 				document.getElementById("up_annex").innerHTML = log_AdslType;
 				document.getElementById("up_SNR_down").innerHTML = log_SNRMarginDown;
 				document.getElementById("up_SNR_up").innerHTML = log_SNRMarginUp;
 				document.getElementById("up_Line_down").innerHTML = log_AttenDown;
 				document.getElementById("up_Line_up").innerHTML = log_AttenUp;
-				document.getElementById("up_wan_mode").innerHTML = log_WanListMode;
 				document.getElementById("up_rate_down").innerHTML = log_DataRateDown;
 				document.getElementById("up_rate_up").innerHTML = log_DataRateUp;
 				document.getElementById("up_maxrate_down").innerHTML = log_AttainDown;
@@ -73,12 +81,13 @@ function update_log(){
 function initial(){
 	show_menu();
 	showadslbootTime();
-	check_adsl_state_up();	
+	check_adsl_state_up();
+	document.getElementById("up_annex").innerHTML = dsl_type;
 	setTimeout("update_log();", 5000);
 }
 
 function check_adsl_state_up(){
-		if(log_lineState == "up"){
+		if(sync_status == "up"){
 				
 				document.getElementById("up_modul").style.display = "";				
 				document.getElementById("up_annex").style.display = "";
@@ -86,7 +95,6 @@ function check_adsl_state_up(){
 				document.getElementById("up_SNR_up").style.display = "";
 				document.getElementById("up_Line_down").style.display = "";
 				document.getElementById("up_Line_up").style.display = "";
-				document.getElementById("up_wan_mode").style.display = "";
 				document.getElementById("up_rate_down").style.display = "";
 				document.getElementById("up_rate_up").style.display = "";
 				document.getElementById("up_maxrate_down").style.display = "";
@@ -105,7 +113,6 @@ function check_adsl_state_up(){
 				document.getElementById("up_SNR_up").style.display = "none";
 				document.getElementById("up_Line_down").style.display = "none";
 				document.getElementById("up_Line_up").style.display = "none";
-				document.getElementById("up_wan_mode").style.display = "none";
 				document.getElementById("up_rate_down").style.display = "none";
 				document.getElementById("up_rate_up").style.display = "none";
 				document.getElementById("up_maxrate_down").style.display = "none";
@@ -120,8 +127,10 @@ function check_adsl_state_up(){
 
 function showadslbootTime(){
 	
-	if(adsl_timestamp != "" && (log_lineState == "up"))
-	{
+	if(adsl_timestamp_update != "" && sync_status_update == "up"){
+		
+		if(adsl_boottime < 0)
+			adsl_boottime = boottime - adsl_timestamp_update;
 		Days = Math.floor(adsl_boottime / (60*60*24));
 		Hours = Math.floor((adsl_boottime / 3600) % 24);
 		Minutes = Math.floor(adsl_boottime % 3600 / 60);
@@ -223,7 +232,7 @@ function showadslbootTime(){
 							<tr>
 								<th width="20%"><#dslsetting_disc2#></th>
 								<td>
-									<div id="up_annex"><% nvram_get("dsllog_adsltype"); %></div>
+									<div id="up_annex"></div>
 								</td>
 							</tr>
 							<tr>
@@ -251,11 +260,25 @@ function showadslbootTime(){
 								</td>
 							</tr>
 							<tr>
-								<th width="20%">Path Mode</th>
+								<th width="20%">Path Mode(downstream)</th>
 								<td>
-									<div id="up_wan_mode"><% nvram_get("dsllog_wanlistmode"); %></div>
+									<div id="up_path_mode_down"><% nvram_get("dsllog_pathmodedown"); %></div>
 								</td>
 							</tr>
+							<tr>
+								<th width="20%">Path Mode(upstream)</th>
+								<td>
+									<div id="up_path_mode_up"><% nvram_get("dsllog_pathmodeup"); %></div>
+								</td>
+							</tr>
+							<!--
+							<tr>
+								<th width="20%">Interleave Depth</th>
+								<td>
+									<div id="up_path_interleave_depth"><% nvram_get("dsllog_interleavedepth"); %></div>
+								</td>
+							</tr>
+							-->
 							<tr>
 								<th width="20%">Data Rate Down</th>
 								<td>

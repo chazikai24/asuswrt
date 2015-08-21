@@ -73,7 +73,14 @@ fi
 # Tomato USB special case
 if [ -f ../shared/tomato_version ]; then
 	OS_NAME=Tomato
-	OS_VERSION="Tomato $(cat ../shared/tomato_version)"
+	TOMATO_VER=`cat ../shared/tomato_version | cut -d' ' -f2,3`
+	OS_VERSION="Tomato $TOMATO_VER"
+fi
+
+# AsusWRT
+if [ -f Makefile.asus ]; then
+	OS_NAME=AsusWRT
+	OS_VERSION=$(awk -F'"' '/RT_VERSION/{print $2}' ../shared/version.h)
 fi
 
 ${RM} ${CONFIGFILE}
@@ -265,7 +272,9 @@ case $OS_NAME in
 		OS_NAME=UPnP
 		OS_URL=http://tomatousb.org/
 		echo "" >> ${CONFIGFILE}
-		echo "#include <tomato_config.h>" >> ${CONFIGFILE}
+		echo "#ifndef TOMATO" >> ${CONFIGFILE}
+		echo "#define TOMATO" >> ${CONFIGFILE}
+		echo "#endif" >> ${CONFIGFILE}
 		echo "" >> ${CONFIGFILE}
 		echo "#ifdef LINUX26" >> ${CONFIGFILE}
 		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
@@ -275,6 +284,15 @@ case $OS_NAME in
 		echo "#endif" >> ${CONFIGFILE}
 		FW=netfilter
 		;;
+	AsusWRT)
+		OS_URL=http://www.asus.com/
+		echo "" >> ${CONFIGFILE}
+		cat ../shared/version.h >> ${CONFIGFILE}
+		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
+		echo "#define USE_GETIFADDRS 1" >> ${CONFIGFILE}
+		FW=netfilter
+		;;
+
 	Darwin)
 		MAJORVER=`echo $OS_VERSION | cut -d. -f1`
 		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
@@ -521,7 +539,7 @@ EOF
 cat >> ${CONFIGFILE} <<EOF
 /* Uncomment the following line if your device does not have a proper clock
  * BOOTID.UPNP.ORG can be set with command line */
-#define USE_TIME_AS_BOOTID
+/*#define USE_TIME_AS_BOOTID*/
 EOF
 
 echo "#endif /* ${CONFIGMACRO} */" >> ${CONFIGFILE}
